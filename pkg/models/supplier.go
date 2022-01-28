@@ -8,6 +8,7 @@ type Supplier struct {
 	Type              *string
 	Image             string
 	Products          map[int]Product // key -- id for Product
+	Devices           []*Device
 }
 
 func (s Supplier) GetPassHash() {

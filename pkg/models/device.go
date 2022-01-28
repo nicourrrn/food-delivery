@@ -1,9 +1,9 @@
 package models
 
 type Device struct {
-	ID, UserID int
-	UserAgent  string
-	RefreshKey string
+	ID, ClientID int
+	UserAgent    string
+	RefreshKey   string
 }
 
 func (d *Device) EqualsUserAgent(userAgent string) bool {

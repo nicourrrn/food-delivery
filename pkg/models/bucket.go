@@ -3,7 +3,7 @@ package models
 type Bucket struct {
 	ID, UserID   int
 	Address      *Branch
-	Client       *struct{}
+	Client       *Client
 	CoordinateTo Coordinate
 	Paid, Closed bool
 	UserPhone    string

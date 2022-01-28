@@ -8,7 +8,7 @@ type Client struct {
 	HomeCoordinate Coordinate
 	Phone          string
 	LastVisit      time.Time
-	Devices        map[int]struct{}
+	Devices        map[int]Device
 }
 
 func (c *Client) GetPassHash() {}
