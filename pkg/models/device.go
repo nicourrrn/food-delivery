@@ -1,9 +1,13 @@
 package models
 
+import "time"
+
 type Device struct {
-	ID, ClientID int
-	UserAgent    string
-	RefreshKey   string
+	ID             int
+	User           User
+	LastVisit      time.Time
+	UserAgent      string
+	RefreshKeyHash string
 }
 
 func (d *Device) EqualsUserAgent(userAgent string) bool {

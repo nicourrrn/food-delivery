@@ -2,13 +2,16 @@ package models
 
 // Branch for Supplier
 type Branch struct {
-	ID          int
+	User
 	Supplier    *Supplier
 	Coordinate  Coordinate
 	Image       string
 	WorkingHour struct {
 		Open, Close string
 	}
-	Products []*Product
-	Devices  []*Device
+	Products map[*Product]bool
+}
+
+func (b Branch) GetType() string {
+	return "Branch"
 }

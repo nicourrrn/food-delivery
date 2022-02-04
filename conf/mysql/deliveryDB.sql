@@ -391,7 +391,7 @@ DELIMITER ;
 -- Table structure for table `products_basket`
 --
 
-DROP TABLE IF EXISTS `products_basket`;
+DROP TABLE IF EXISTS basket_products;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `products_basket` (
@@ -410,9 +410,9 @@ CREATE TABLE `products_basket` (
 -- Dumping data for table `products_basket`
 --
 
-LOCK TABLES `products_basket` WRITE;
-/*!40000 ALTER TABLE `products_basket` DISABLE KEYS */;
-/*!40000 ALTER TABLE `products_basket` ENABLE KEYS */;
+LOCK TABLES basket_products WRITE;
+/*!40000 ALTER TABLE basket_products DISABLE KEYS */;
+/*!40000 ALTER TABLE basket_products ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -423,7 +423,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `updated_at_products_basket` BEFORE UPDATE ON `products_basket` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `updated_at_products_basket` BEFORE UPDATE ON basket_products FOR EACH ROW BEGIN
 SET NEW.updated_at = CURRENT_TIMESTAMP();
 END */;;
 DELIMITER ;
@@ -436,7 +436,7 @@ DELIMITER ;
 -- Table structure for table `products_branch`
 --
 
-DROP TABLE IF EXISTS `products_branch`;
+DROP TABLE IF EXISTS branch_products;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `products_branch` (
@@ -456,9 +456,9 @@ CREATE TABLE `products_branch` (
 -- Dumping data for table `products_branch`
 --
 
-LOCK TABLES `products_branch` WRITE;
-/*!40000 ALTER TABLE `products_branch` DISABLE KEYS */;
-/*!40000 ALTER TABLE `products_branch` ENABLE KEYS */;
+LOCK TABLES branch_products WRITE;
+/*!40000 ALTER TABLE branch_products DISABLE KEYS */;
+/*!40000 ALTER TABLE branch_products ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
@@ -469,7 +469,7 @@ UNLOCK TABLES;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `updated_at_products_branch` BEFORE UPDATE ON `products_branch` FOR EACH ROW BEGIN
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `updated_at_products_branch` BEFORE UPDATE ON branch_products FOR EACH ROW BEGIN
 SET NEW.updated_at = CURRENT_TIMESTAMP();
 END */;;
 DELIMITER ;

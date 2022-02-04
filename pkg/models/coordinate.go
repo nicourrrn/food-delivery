@@ -1,6 +1,8 @@
 package models
 
 type Coordinate struct {
-	X, Y      int
+	ID        int
+	X, Y      float64
 	Humanized string
+	Name      string
 }
