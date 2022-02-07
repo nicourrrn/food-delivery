@@ -1,19 +1,68 @@
 package models
 
-var SupplierTypes map[int]*string
+import "errors"
+
+type SupplierType *string
+
+func GetSupplType(id int) SupplierType {
+	return supplierTypes[id]
+}
+func UpdateSupplTypes(newTypes map[int]string) {
+	supplierTypes = make(map[int]SupplierType)
+	for id, str := range newTypes {
+		supplierTypes[id] = &str
+	}
+}
+
+var supplierTypes map[int]SupplierType
 
 type Supplier struct {
 	User
-	Branches    []Branch
+	Branches    map[int]Branch
 	Description string
-	Type        *string
+	Type        SupplierType
 	Image       string
 	Products    map[int]Product // key -- id for Product
 }
 
-func (s Supplier) GetType() string {
-	return "Supplier"
+func NewSupplier(u User, supplierType SupplierType) (*Supplier, error) {
+	if supplierType == nil {
+		return nil, errors.New("type is nil")
+	}
+	if u.GetType() != "User" {
+		return nil, errors.New("var u is not User")
+	}
+	return &Supplier{User: u, Type: supplierType,
+		Branches: make(map[int]Branch),
+		Products: make(map[int]Product)}, nil
 }
 
-func (s Supplier) GetPassHash() {
+func (s *Supplier) AddProduct(p Product) error {
+	if p.Supplier != s && p.Supplier != nil {
+		return errors.New("product does not belong to the supplier")
+	}
+	p.Supplier = s
+	s.Products[p.ID] = p
+	return nil
+}
+
+func (s *Supplier) MakeBranch(u User) (*Branch, error) {
+	branch, err := NewBranch(u, s)
+	if err != nil {
+		return nil, err
+	}
+	s.Branches[u.ID] = branch
+	return &branch, nil
+}
+
+func (s *Supplier) GetBranch(id int) (*Branch, error) {
+	branch, ok := s.Branches[id]
+	if !ok {
+		return nil, errors.New("branch not found")
+	}
+	return &branch, nil
+}
+
+func (s Supplier) GetType() string {
+	return "Supplier"
 }
