@@ -24,7 +24,9 @@ type SupplierRepo struct {
 	}
 }
 
-func NewSupplierRepo(db DB, group *sync.WaitGroup) SupplierRepo {
+var GlobalSupplierRepo *SupplierRepo
+
+func InitSupplierRepo(db DB, group *sync.WaitGroup) *SupplierRepo {
 	supplierRepo := SupplierRepo{
 		DB: db,
 		CachedSupplier: make(map[int]*struct {
@@ -43,7 +45,8 @@ func NewSupplierRepo(db DB, group *sync.WaitGroup) SupplierRepo {
 	log.Println("Supplier repo Garbage Collerctor running")
 	group.Add(1)
 	go supplierRepo.GarbageCollector(group)
-	return supplierRepo
+	GlobalSupplierRepo = &supplierRepo
+	return GlobalSupplierRepo
 }
 
 func (r *SupplierRepo) GetSupplier(id int) (*models.Supplier, error) {
