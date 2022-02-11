@@ -1,5 +1,7 @@
 package models
 
+import "errors"
+
 type Client struct {
 	User
 	Phone           string
@@ -20,16 +22,15 @@ func NewClient(u User) Client {
 	}
 }
 
-func (c *Client) MakeBasket(coordinate *Coordinate) Basket {
-	// TODO check coordinate
-	//if coordinate == nil {
-	//
-	//}
+func (c *Client) MakeBasket(coordinate *Coordinate) (Basket, error) {
+	if coordinate == nil {
+		return Basket{}, errors.New("coordinate is nil")
+	}
 	return Basket{
 		Client:       c,
 		CoordinateTo: coordinate,
 		Products:     make([]*Product, 0),
-	}
+	}, nil
 }
 
 func (c *Client) AddCoordinate(coordinate *Coordinate) {

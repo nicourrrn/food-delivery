@@ -40,9 +40,6 @@ func (b *Branch) AddProductFromSupplier(id int) (*Product, error) {
 	if !ok {
 		return nil, errors.New("product is exist from supplier")
 	}
-	//if product == nil {
-	//	return nil, errors.New("product is exist but nil")
-	//}
 	b.Products[id] = ProdWithStatus{Exist: true, Product: product}
 	return product, nil
 }
