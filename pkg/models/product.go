@@ -6,7 +6,7 @@ type Ingredient *string
 
 var ingredients map[int]Ingredient
 
-func GetIngredientById(id int) (Ingredient, error) {
+func GetIngredient(id int) (Ingredient, error) {
 	ing, ok := ingredients[id]
 	if !ok {
 		return nil, errors.New("ingredient not found")
@@ -27,7 +27,7 @@ var productTypes map[int]ProductType
 func GetProductType(id int) (ProductType, error) {
 	productType, ok := productTypes[id]
 	if !ok {
-		return nil, errors.New("ingredient not found")
+		return nil, errors.New("product not found")
 	}
 	return productType, nil
 }

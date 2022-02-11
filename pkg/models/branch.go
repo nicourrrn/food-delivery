@@ -1,6 +1,13 @@
 package models
 
-import "errors"
+import (
+	"errors"
+)
+
+type ProdWithStatus struct {
+	Exist   bool
+	Product *Product
+}
 
 // Branch for Supplier
 type Branch struct {
@@ -11,10 +18,7 @@ type Branch struct {
 	WorkingHour struct {
 		Open, Close string
 	}
-	Products map[int]struct {
-		Exist   bool
-		Product *Product
-	}
+	Products map[int]ProdWithStatus
 }
 
 func (b Branch) GetType() string {
@@ -25,10 +29,10 @@ func NewBranch(u User, s *Supplier) (Branch, error) {
 	if u.GetType() != "User" {
 		return Branch{}, errors.New("var u is not User")
 	}
-	return Branch{Supplier: s, Products: make(map[int]struct {
-		Exist   bool
-		Product *Product
-	})}, nil
+	return Branch{
+		Supplier: s,
+		Products: make(map[int]ProdWithStatus),
+	}, nil
 }
 
 func (b *Branch) AddProductFromSupplier(id int) (*Product, error) {
@@ -36,20 +40,17 @@ func (b *Branch) AddProductFromSupplier(id int) (*Product, error) {
 	if !ok {
 		return nil, errors.New("product is exist from supplier")
 	}
-	b.Products[id] = struct {
-		Exist   bool
-		Product *Product
-	}{Exist: true, Product: &product}
-	return &product, nil
+	//if product == nil {
+	//	return nil, errors.New("product is exist but nil")
+	//}
+	b.Products[id] = ProdWithStatus{Exist: true, Product: product}
+	return product, nil
 }
 func (b *Branch) ChangeProductExist(id int) error {
 	productInfo, ok := b.Products[id]
 	if !ok {
 		return errors.New("product not found")
 	}
-	b.Products[id] = struct {
-		Exist   bool
-		Product *Product
-	}{Exist: !productInfo.Exist, Product: productInfo.Product}
+	b.Products[id] = ProdWithStatus{Exist: !productInfo.Exist, Product: productInfo.Product}
 	return nil
 }
