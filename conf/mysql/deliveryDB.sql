@@ -4,10 +4,12 @@
 -- ------------------------------------------------------
 -- Server version	8.0.28-0ubuntu0.20.04.3
 
+USE test_delivery;
+
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!50503 SET NAMES utf8*/;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -18,10 +20,11 @@
 --
 -- Table structure for table `baskets`
 --
-
+USE test_delivery;
 DROP TABLE IF EXISTS `baskets`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `baskets` (
   `id` int NOT NULL AUTO_INCREMENT,
   `client_id` int NOT NULL,
@@ -39,7 +42,8 @@ CREATE TABLE `baskets` (
   CONSTRAINT `baskets_client_info_user_id_fk` FOREIGN KEY (`client_id`) REFERENCES `client_info` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `baskets_coordinates_id_fk` FOREIGN KEY (`coordinates_to_id`) REFERENCES `coordinates` (`id`) ON DELETE CASCADE,
   CONSTRAINT `baskets_supl_branches_id_fk` FOREIGN KEY (`branch_id`) REFERENCES `supl_branches` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,9 +57,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -74,7 +81,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `client_coordinates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `client_coordinates` (
   `client_id` int NOT NULL,
   `coordinate_id` int DEFAULT NULL,
@@ -84,7 +92,8 @@ CREATE TABLE `client_coordinates` (
   KEY `users_coordinates_users_id_fk` (`client_id`),
   CONSTRAINT `users_coordinates_coordinates_id_fk` FOREIGN KEY (`coordinate_id`) REFERENCES `coordinates` (`id`) ON DELETE CASCADE,
   CONSTRAINT `users_coordinates_users_id_fk` FOREIGN KEY (`client_id`) REFERENCES `client_info` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,9 +107,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -119,7 +131,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `client_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `client_info` (
   `user_id` int NOT NULL,
   `phone` varchar(16) DEFAULT NULL,
@@ -127,7 +140,8 @@ CREATE TABLE `client_info` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   KEY `client_info_users_id_fk` (`user_id`),
   CONSTRAINT `client_info_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -141,9 +155,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -162,7 +179,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `coordinates`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `coordinates` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(32) DEFAULT NULL,
@@ -172,7 +190,8 @@ CREATE TABLE `coordinates` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,9 +205,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -207,7 +229,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `devices`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `devices` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_id` int NOT NULL,
@@ -219,7 +242,8 @@ CREATE TABLE `devices` (
   PRIMARY KEY (`id`),
   KEY `devices_users_id_fk` (`user_id`),
   CONSTRAINT `devices_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -233,9 +257,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -254,7 +281,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `ingredients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `ingredients` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
@@ -262,7 +290,8 @@ CREATE TABLE `ingredients` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ingredients_name_uindex` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -276,9 +305,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -297,7 +329,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `product_ingredients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `product_ingredients` (
   `product_id` int DEFAULT NULL,
   `ingredient_id` int DEFAULT NULL,
@@ -307,7 +340,8 @@ CREATE TABLE `product_ingredients` (
   KEY `product_ingredients_products_id_fk` (`product_id`),
   CONSTRAINT `product_ingredients_ingredients_id_fk` FOREIGN KEY (`ingredient_id`) REFERENCES `ingredients` (`id`),
   CONSTRAINT `product_ingredients_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -321,9 +355,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -342,7 +379,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `products`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `products` (
   `id` int NOT NULL AUTO_INCREMENT,
   `supl_id` int DEFAULT NULL,
@@ -358,7 +396,8 @@ CREATE TABLE `products` (
   KEY `products_products_types_id_fk` (`type_id`),
   CONSTRAINT `products_products_types_id_fk` FOREIGN KEY (`type_id`) REFERENCES `products_types` (`id`) ON DELETE CASCADE,
   CONSTRAINT `products_supplier_info_user_id_fk` FOREIGN KEY (`supl_id`) REFERENCES `supplier_info` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -372,9 +411,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -393,7 +435,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS basket_products;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `products_basket` (
   `product_id` int DEFAULT NULL,
   `basket_id` int DEFAULT NULL,
@@ -403,7 +446,8 @@ CREATE TABLE `products_basket` (
   KEY `products_basket_products_id_fk` (`product_id`),
   CONSTRAINT `products_basket_baskets_id_fk` FOREIGN KEY (`basket_id`) REFERENCES `baskets` (`id`) ON DELETE CASCADE,
   CONSTRAINT `products_basket_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -417,9 +461,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -438,7 +485,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS branch_products;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `products_branch` (
   `product_id` int DEFAULT NULL,
   `branch_id` int DEFAULT NULL,
@@ -449,7 +497,8 @@ CREATE TABLE `products_branch` (
   KEY `products_branch_supl_branches_id_fk` (`branch_id`),
   CONSTRAINT `products_branch_products_id_fk` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `products_branch_supl_branches_id_fk` FOREIGN KEY (`branch_id`) REFERENCES `supl_branches` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -463,9 +512,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -484,7 +536,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `products_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `products_types` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(64) DEFAULT NULL,
@@ -492,7 +545,8 @@ CREATE TABLE `products_types` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `products_types_name_uindex` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -506,9 +560,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -527,7 +584,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `supl_branches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `supl_branches` (
   `id` int NOT NULL AUTO_INCREMENT,
   `coordinate_id` int DEFAULT NULL,
@@ -542,7 +600,8 @@ CREATE TABLE `supl_branches` (
   KEY `supl_branches_supplier_info_user_id_fk` (`supplier_id`),
   CONSTRAINT `supl_branches_coordinates_id_fk` FOREIGN KEY (`coordinate_id`) REFERENCES `coordinates` (`id`) ON DELETE CASCADE,
   CONSTRAINT `supl_branches_supplier_info_user_id_fk` FOREIGN KEY (`supplier_id`) REFERENCES `supplier_info` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -556,9 +615,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -577,7 +639,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `supplier_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `supplier_info` (
   `user_id` int NOT NULL,
   `description` text,
@@ -588,7 +651,8 @@ CREATE TABLE `supplier_info` (
   KEY `supplier_info_suppliers_types_id_fk` (`supplier_type_id`),
   CONSTRAINT `supplier_info_suppliers_types_id_fk` FOREIGN KEY (`supplier_type_id`) REFERENCES `suppliers_types` (`id`) ON DELETE CASCADE,
   CONSTRAINT `supplier_info_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -602,9 +666,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -623,7 +690,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `suppliers_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `suppliers_types` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` int NOT NULL,
@@ -631,7 +699,8 @@ CREATE TABLE `suppliers_types` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `suppliers_types_name_uindex` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -645,9 +714,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -666,7 +738,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
@@ -681,7 +754,8 @@ CREATE TABLE `users` (
   UNIQUE KEY `client_login_uindex` (`login`),
   KEY `users_users_types_id_fk` (`user_type_id`),
   CONSTRAINT `users_users_types_id_fk` FOREIGN KEY (`user_type_id`) REFERENCES `users_types` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -695,9 +769,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
@@ -716,7 +793,8 @@ DELIMITER ;
 
 DROP TABLE IF EXISTS `users_types`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!50503 SET character_set_client = utf8
+ */;
 CREATE TABLE `users_types` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(32) NOT NULL,
@@ -724,7 +802,8 @@ CREATE TABLE `users_types` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `users_types_name_uindex` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -738,9 +817,12 @@ UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
 /*!50003 SET @saved_cs_results     = @@character_set_results */ ;
 /*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8mb4 */ ;
-/*!50003 SET character_set_results = utf8mb4 */ ;
-/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET character_set_client  = utf8
+ */ ;
+/*!50003 SET character_set_results = utf8
+ */ ;
+/*!50003 SET collation_connection  = utf8_general_ci
+ */ ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
