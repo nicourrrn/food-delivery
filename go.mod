@@ -3,6 +3,7 @@ module food-delivery
 go 1.17
 
 require (
+	github.com/bxcodec/faker/v3 v3.7.0
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
 )
