@@ -44,5 +44,12 @@ func TestGenerateFakeData(t *testing.T) {
 	beforeChange := branch.Products[randProdId].Exist
 	assert.NoError(t, branch.ChangeProductExist(randProdId))
 	assert.NotEqual(t, branch.Products[randProdId].Exist, beforeChange)
+}
 
+func TestCast(t *testing.T) {
+	u, _ := models.NewUser("Heloo", "asdf")
+	l := models.TypedUser(u)
+	assert.Equal(t, l.GetType(), "User")
+	l2 := models.TypedUser(models.NewClient(l.(models.User)))
+	assert.Equal(t, l2.GetType(), "Client")
 }

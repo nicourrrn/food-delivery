@@ -21,3 +21,7 @@ func NewUser(login, pass string) (User, error) {
 func (u User) GetType() string {
 	return "User"
 }
+
+type TypedUser interface {
+	GetType() string
+}
