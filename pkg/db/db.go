@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"food-delivery/pkg/models"
-	"sync"
 )
 
 type DB struct {
@@ -24,10 +23,6 @@ func NewDB(login, password, dbName string) (DB, error) {
 	return DB{
 		Conn: db,
 	}, nil
-}
-
-type Garbage interface {
-	GarbageCollector(group sync.WaitGroup)
 }
 
 func (r *DB) LoadUserByID(id int) (models.TypedUser, error) {
@@ -50,4 +45,14 @@ func (r *DB) LoadUserByID(id int) (models.TypedUser, error) {
 		err = errors.New("user type not found from db")
 	}
 	return castedUser, err
+}
+
+type Garbage interface {
+	GarbageCollector()
+}
+
+func (r *DB) RunGarbage(Garbagers ...Garbage) {
+	for _, g := range Garbagers {
+		g.GarbageCollector()
+	}
 }
