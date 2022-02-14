@@ -66,30 +66,11 @@ func InitSupplierRepo(db DB, group *sync.WaitGroup) (*SupplierRepo, error) {
 	return GlobalSupplierRepo, nil
 }
 
-func (r *SupplierRepo) LoadUser(id int) (interface{}, error) {
-	row := r.Conn.QueryRow("SELECT users.id, users.name, users.login, users.email, ut.name FROM users JOIN users_types ut on users.user_type_id = ut.id WHERE users.id = ?", id)
-	user := models.User{}
-	var userType string
-	row.Scan(user.ID, user.Name, user.Login, user.Email, userType)
-	var (
-		castedUser interface{}
-		err        error
-	)
-	switch userType {
-	case "Supplier":
-		castedUser, err = r.LoadSupplier(user)
-	case "Branch":
-		castedUser, err = r.LoadBranch(user)
-	default:
-		err = errors.New("user type not found from db")
-	}
-	return castedUser, err
-}
-
 // Branch methods
 func (r *SupplierRepo) GetBranch(id int) (*models.Branch, error) {
 	if data, ok := r.CachedBranch[id]; !ok {
-		_, err := r.LoadUser(id)
+		//_, err := r.LoadUser(id)
+		_, err := LoadUserByID(&r.DB, id)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +109,7 @@ func (r SupplierRepo) LoadBranch(user models.User) (models.Branch, error) {
 // Supplier methods
 func (r *SupplierRepo) GetSupplier(id int) (*models.Supplier, error) {
 	if data, ok := r.CachedSupplier[id]; !ok {
-		_, err := r.LoadUserByID(id)
+		_, err := LoadUserByID(&r.DB, id)
 		if err != nil {
 			return nil, err
 		}
@@ -279,7 +260,6 @@ func (r *SupplierRepo) GetProductsForBranch(branch models.Branch) error {
 
 // Garbage interface
 func (r *SupplierRepo) GarbageCollector() {
-	time.Sleep(time.Minute)
 	now := time.Now()
 	for i, p := range r.CachedProduct {
 		if p.DeadTime.Before(now) {
