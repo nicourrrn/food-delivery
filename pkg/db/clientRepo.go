@@ -2,7 +2,6 @@ package db
 
 import (
 	"food-delivery/pkg/models"
-	"sync"
 	"time"
 )
 
@@ -20,7 +19,7 @@ type ClientRepo struct {
 
 var GlobalClientRepo *ClientRepo
 
-func InitClientRepo(db DB, group sync.WaitGroup) *ClientRepo {
+func InitClientRepo(db DB) *ClientRepo {
 	clientRepo := ClientRepo{
 		DB: db,
 		CachedClients: make(map[int]*struct {
@@ -32,13 +31,11 @@ func InitClientRepo(db DB, group sync.WaitGroup) *ClientRepo {
 			DeadTime time.Time
 		}),
 	}
-	//log.Println("Supplier repo Garbage Collerctor running")
-	//group.Add(1)
-	//go supplierRepo.GarbageCollector(group)
 	GlobalClientRepo = &clientRepo
 	return GlobalClientRepo
 }
 
+// Client methods
 func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 	row := r.Conn.QueryRow("SELECT phone FROM client_info WHERE user_id = ?", user.ID)
 	client := models.Client{User: user}
@@ -46,6 +43,7 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 	if err != nil {
 		return models.Client{}, err
 	}
+	GlobalHelperRepo.GetCoordinatesByClient(&client)
 	r.CachedClients[user.ID] = &struct {
 		Client   *models.Client
 		DeadTime time.Time
@@ -53,7 +51,6 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 	// TODO вынести время жизни в конфигурацию
 	return client, nil
 }
-
 func (r *ClientRepo) GetClient(id int) (*models.Client, error) {
 	if data, ok := r.CachedClients[id]; !ok {
 		_, err := r.LoadUserByID(id)
@@ -67,6 +64,7 @@ func (r *ClientRepo) GetClient(id int) (*models.Client, error) {
 	}
 }
 
+// Basket methods
 func (r *ClientRepo) LoadBasket(id int) (models.Basket, error) {
 	row := r.Conn.QueryRow("SELECT client_id, coordinates_to_id, paid, closed, editable FROM baskets WHERE id = ?", id)
 	basket := models.Basket{
@@ -79,6 +77,18 @@ func (r *ClientRepo) LoadBasket(id int) (models.Basket, error) {
 	if err != nil {
 		return models.Basket{}, err
 	}
+	basket.CoordinateTo, err = GlobalHelperRepo.GetCoordinate(coordinateToId)
+	if err != nil {
+		return models.Basket{}, err
+	}
+	basket.Client, err = r.GetClient(clientId)
+	if err != nil {
+		return models.Basket{}, err
+	}
+	_, err = GlobalSupplierRepo.GetProductsForBasket(&basket)
+	if err != nil {
+		return models.Basket{}, err
+	}
 	r.CachedBaskets[id] = &struct {
 		Basket   *models.Basket
 		DeadTime time.Time
@@ -86,7 +96,6 @@ func (r *ClientRepo) LoadBasket(id int) (models.Basket, error) {
 	// TODO вынести время жизни в конфигурацию
 	return basket, nil
 }
-
 func (r *ClientRepo) GetBasket(id int) (*models.Basket, error) {
 	if data, ok := r.CachedBaskets[id]; !ok {
 		_, err := r.LoadBasket(id)
@@ -97,5 +106,21 @@ func (r *ClientRepo) GetBasket(id int) (*models.Basket, error) {
 	} else {
 		data.DeadTime = time.Now().Add(time.Hour)
 		return data.Basket, nil
+	}
+}
+
+// Garbage interface
+func (r *ClientRepo) CollectGarbage() {
+	time.Sleep(time.Minute)
+	now := time.Now()
+	for i, b := range r.CachedBaskets {
+		if b.DeadTime.Before(now) {
+			delete(r.CachedBaskets, i)
+		}
+	}
+	for i, c := range r.CachedClients {
+		if c.DeadTime.Before(now) {
+			delete(r.CachedClients, i)
+		}
 	}
 }
