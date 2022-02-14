@@ -96,7 +96,7 @@ func (r *HelperRepo) LoadCoordinate(id int) (models.Coordinate, error) {
 	// TODO вынести время жизни в конфигурацию
 	return coordinate, nil
 }
-func (r HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordinate, error) {
+func (r *HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordinate, error) {
 	rows, err := r.Conn.Query("SELECT coordinate_id FROM client_coordinates WHERE client_id = ?", c.ID)
 	if err != nil {
 		return nil, err
@@ -119,4 +119,18 @@ func (r HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordina
 	}
 	c.CoordinatesList = coordinates
 	return coordinates, nil
+}
+
+func (r *HelperRepo) GarbageCollector() {
+	now := time.Now()
+	for i, p := range r.CachedDevices {
+		if p.DeadTime.Before(now) {
+			delete(r.CachedDevices, i)
+		}
+	}
+	for i, p := range r.CachedCoordinates {
+		if p.DeadTime.Before(now) {
+			delete(r.CachedCoordinates, i)
+		}
+	}
 }
