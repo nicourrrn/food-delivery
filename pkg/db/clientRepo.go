@@ -53,7 +53,7 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 }
 func (r *ClientRepo) GetClient(id int) (*models.Client, error) {
 	if data, ok := r.CachedClients[id]; !ok {
-		_, err := r.LoadUserByID(id)
+		_, err := LoadUserByID(&r.DB, id)
 		if err != nil {
 			return nil, err
 		}
@@ -110,8 +110,7 @@ func (r *ClientRepo) GetBasket(id int) (*models.Basket, error) {
 }
 
 // Garbage interface
-func (r *ClientRepo) CollectGarbage() {
-	time.Sleep(time.Minute)
+func (r *ClientRepo) GarbageCollector() {
 	now := time.Now()
 	for i, b := range r.CachedBaskets {
 		if b.DeadTime.Before(now) {

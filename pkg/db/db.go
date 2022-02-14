@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"food-delivery/pkg/models"
+	"time"
 )
 
 type DB struct {
@@ -24,8 +25,7 @@ func NewDB(login, password, dbName string) (DB, error) {
 		Conn: db,
 	}, nil
 }
-
-func (r *DB) LoadUserByID(id int) (models.TypedUser, error) {
+func LoadUserByID(r *DB, id int) (models.TypedUser, error) {
 	row := r.Conn.QueryRow("SELECT users.id, users.name, users.login, users.email, ut.name FROM users JOIN users_types ut on users.user_type_id = ut.id WHERE users.id = ?", id)
 	user := models.User{}
 	var userType string
@@ -52,6 +52,7 @@ type Garbage interface {
 }
 
 func (r *DB) RunGarbage(Garbagers ...Garbage) {
+	time.Sleep(time.Minute)
 	for _, g := range Garbagers {
 		g.GarbageCollector()
 	}
