@@ -39,9 +39,10 @@ func UpdateProductTypes(newTypes map[int]string) {
 }
 
 type Product struct {
-	ID                int
-	Supplier          *Supplier
-	Price             float32
+	ID       int
+	Supplier *Supplier
+	Price    float32
+	// TODO переписать на отдельный тип Ингредиент
 	Ingredients       []*string
 	Name, Description string
 	Image             string
