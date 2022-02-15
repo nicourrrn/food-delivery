@@ -36,14 +36,14 @@ func TestGenerateFakeData(t *testing.T) {
 	assert.NoError(t, clientBasket.RemoveProduct(lastProduct))
 	assert.Equal(t, len(clientBasket.Products), 9)
 	branch := data.GetRandBranch()
-	keys := make([]int, 0)
+	keys := make([]int64, 0)
 	for k, _ := range branch.Products {
 		keys = append(keys, k)
 	}
 	randProdId := keys[rand.Int()%len(keys)]
-	beforeChange := branch.Products[randProdId].Exist
-	assert.NoError(t, branch.ChangeProductExist(randProdId))
-	assert.NotEqual(t, branch.Products[randProdId].Exist, beforeChange)
+	beforeChange := branch.Products[int64(randProdId)].Exist
+	assert.NoError(t, branch.ChangeProductExist(int64(randProdId)))
+	assert.NotEqual(t, branch.Products[int64(randProdId)].Exist, beforeChange)
 }
 
 func TestCast(t *testing.T) {

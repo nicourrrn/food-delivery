@@ -20,21 +20,27 @@ func GenerateFakeData() FakeData {
 		Clients:   make([]models.Client, 0),
 	}
 	rand.Seed(time.Now().Unix())
-	models.UpdateSupplTypes(map[int]string{
-		1: "hookah",
-		2: "sport",
-	})
-	models.UpdateProductTypes(map[int]string{
-		1: "smoke",
-		2: "box",
-	})
-	ing := make(map[int]string)
-	for i := 0; i < 10; i++ {
-		word := faker.Word()
-		//log.Println(word)
-		ing[i] = word
+	var (
+		hookah = "hookah"
+		sport  = "sport"
+		smoke  = "smoke"
+		box    = "box"
+	)
+	*models.GetSupplierTypes() = map[int64]models.SupplierType{
+		1: models.SupplierType(&hookah),
+		2: models.SupplierType(&sport),
 	}
-	models.UpdateIngredients(ing)
+	*models.GetProductTypes() = map[int64]models.ProductType{
+		1: models.ProductType(&smoke),
+		2: models.ProductType(&box),
+	}
+	ing := make(map[int64]models.Ingredient)
+	var i int64
+	for i = 0; i < 10; i++ {
+		word := faker.Word()
+		ing[i] = &word
+	}
+	*models.GetIngredients() = ing
 
 	for i := 0; i < 10; i++ {
 		user, err := models.NewUser(faker.Username(), faker.Password())
@@ -42,34 +48,31 @@ func GenerateFakeData() FakeData {
 			log.Fatalln(err)
 		}
 		//log.Println(user.Name)
-		suppl, err := models.NewSupplier(user, models.GetSupplType(rand.Int()%2+1))
+		suppl, err := models.NewSupplier(user, (*models.GetSupplierTypes())[int64(rand.Int()%2+1)])
 		if err != nil {
 			log.Fatalln(err)
 		}
 		for j := 0; j < 6; j++ {
-			pType, err := models.GetProductType(rand.Int()%2 + 1)
-			if err != nil {
-				log.Fatalln(err)
+			pType, ok := (*models.GetProductTypes())[int64(rand.Int()%2+1)]
+			if !ok {
+				log.Fatalln("prod fatal")
 			}
 			prod, err := models.NewProduct(faker.Name(), rand.Float32(), pType)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			prod.ID = j
+			prod.ID = int64(j)
 			prodPrt, err := suppl.AddProduct(prod)
 			if err != nil {
 				log.Fatalln(err)
 			}
 
-			ingredient, err := models.GetIngredient(rand.Int() % 10)
-			if err != nil {
-				log.Fatalln(err)
+			ingredient, ok := (*models.GetIngredients())[int64(rand.Int()%10)]
+			if !ok {
+				log.Fatalln("ing fatal")
 			}
 			prodPrt.Ingredients = append(prodPrt.Ingredients, ingredient)
 		}
-		//for k, v := range sulp.Products {
-		//log.Printf("Key: %d Value: %s", k, v.Name)
-		//}
 		for j := 0; j < 3; j++ {
 			user, err = models.NewUser(faker.Username(), faker.Password())
 			if err != nil {
@@ -80,7 +83,7 @@ func GenerateFakeData() FakeData {
 				log.Fatalln(err)
 			}
 			for c := 0; c < 2; c++ {
-				prodPtr, err := branch.AddProductFromSupplier(rand.Int() % 6)
+				prodPtr, err := branch.AddProductFromSupplier(int64(rand.Int() % 6))
 				if err != nil {
 					log.Fatalln(err)
 				}
@@ -117,7 +120,7 @@ func (d *FakeData) GetRandSupplier() *models.Supplier {
 }
 func (d *FakeData) GetRandBranch() *models.Branch {
 	s := d.GetRandSupplier()
-	branch, _ := s.Branches[rand.Int()%len(s.Branches)]
+	branch, _ := s.Branches[int64(rand.Int()%len(s.Branches))]
 	return branch
 }
 func (d FakeData) GetRandProductFromB() models.ProdWithStatus {
