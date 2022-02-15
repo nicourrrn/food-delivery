@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"food-delivery/pkg/models"
 	"strconv"
 	"time"
@@ -67,45 +68,46 @@ func (r *ClientRepo) GetClient(id int64) (*models.Client, error) {
 		return data.Client, nil
 	}
 }
-func (r *ClientRepo) SaveClient(client models.Client) error {
-	ctx := context.Background()
-	tx, err := r.Conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
-	err = SaveUser(r.DB, &client.User, tx, ctx)
+func (r *ClientRepo) SaveClient(client *models.Client, tx *sql.Tx, ctx context.Context) error {
+	oldID := client.ID
+	err := SaveUser(r.DB, &client.User, client.GetType(), tx, ctx)
 	if err != nil {
 		return err
 	}
 	var (
 		args = []interface{}{client.Phone, client.ID}
-		id   int64
 	)
-	if client.ID != 0 {
-		id, err = Saver{
+	if oldID == 0 {
+		_, err = Saver{
 			Query: "INSERT INTO client_info(phone, user_id) VALUE (?, ?);",
 			Args:  args,
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	} else {
-		id, err = Saver{
+		_, err = Saver{
 			Query: "UPDATE client_info SET phone = ? WHERE user_id = ?;",
 			Args:  args,
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	}
+	if err != nil {
+		return err
+	}
+	//var (
+	//	savedCoordinates :=
+	//)
 	for _, coordinate := range client.CoordinatesList {
-		err = globalHelperRepo.SaveCoordinate(coordinate)
+		err = globalHelperRepo.SaveCoordinate(coordinate, tx, ctx)
+		if err != nil {
+			return err
+		}
+		_, err = Saver{
+			Query: "INSERT INTO client_coordinates(client_id, coordinate_id)  VALUE (?, ?);",
+			Args:  []interface{}{client.ID, coordinate.ID},
+		}.Save(tx, ctx)
 		if err != nil {
 			return err
 		}
 	}
-
-	if err != nil {
-		return err
-	}
-	if client.ID == 0 {
-		client.ID = id
-	}
-	return nil
+	return err
 }
 
 // Basket methods
@@ -152,26 +154,22 @@ func (r *ClientRepo) GetBasket(id int64) (*models.Basket, error) {
 		return data.Basket, nil
 	}
 }
-func (r *ClientRepo) SaveBasket(basket *models.Basket) error {
-	ctx := context.Background()
-	tx, err := r.Conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
+func (r *ClientRepo) SaveBasket(basket *models.Basket, tx *sql.Tx, ctx context.Context) error {
 	var (
 		args = []interface{}{basket.Paid, basket.Closed, basket.Editable}
 		id   int64
+		err  error
 	)
-	if basket.ID != 0 {
+	if basket.ID == 0 {
 		id, err = Saver{
 			Query: "INSERT INTO baskets(paid, closed, editable, client_id, coordinates_to_id) VALUE (?, ?, ?, ?, ?);",
 			Args:  append(args, basket.Client.ID, basket.CoordinateTo.ID),
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE baskets SET paid = ?, closed = ?, editable = ?, final_price = ? WHERE id = ?;",
 			Args:  append(args, basket.FinalPrice, basket.ID),
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	}
 	if err != nil {
 		return err

@@ -8,7 +8,6 @@ import (
 	"food-delivery/pkg/models"
 	"github.com/bxcodec/faker/v3/support/slice"
 	_ "github.com/go-sql-driver/mysql"
-	"log"
 	"time"
 )
 
@@ -83,8 +82,8 @@ func LoadUser(r *DB, key, value string) (models.TypedUser, error) {
 	return castedUser, err
 }
 
-func SaveUser(db *DB, user *models.User, tx *sql.Tx, ctx context.Context) error {
-	if _, ok := userTypes[user.GetType()]; !ok {
+func SaveUser(db *DB, user *models.User, userType string, tx *sql.Tx, ctx context.Context) error {
+	if _, ok := userTypes[userType]; !ok {
 		return errors.New("user type unknown")
 	}
 	var (
@@ -92,16 +91,16 @@ func SaveUser(db *DB, user *models.User, tx *sql.Tx, ctx context.Context) error 
 		id   int64
 		err  error
 	)
-	if user.ID != 0 {
+	if user.ID == 0 {
 		id, err = Saver{
 			Query: "INSERT INTO users(name, login, email, pass_hash, user_type_id) VALUE (?, ?, ?, ?, ?);",
-			Args:  append(args, userTypes[user.GetType()]),
-		}.Save(db, tx, ctx)
+			Args:  append(args, userTypes[userType]),
+		}.Save(tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE users SET name = ?, login = ?, email = ?, pass_hash = ? WHERE id = ?;",
 			Args:  append(args, user.ID),
-		}.Save(db, tx, ctx)
+		}.Save(tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -115,18 +114,17 @@ type Saver struct {
 	Args  []interface{}
 }
 
-func (s Saver) Save(db *DB, tx *sql.Tx, ctx context.Context) (int64, error) {
+func (s Saver) Save(tx *sql.Tx, ctx context.Context) (int64, error) {
 	result, err := tx.ExecContext(ctx, s.Query, s.Args...)
 	if err != nil {
-		err = tx.Rollback()
-		if err != nil {
+		errRollback := tx.Rollback()
+		if errRollback != nil {
 			return 0, err
 		}
 		return 0, err
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		log.Println(err)
 		return 0, err
 	}
 	return id, nil

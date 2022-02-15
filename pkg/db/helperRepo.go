@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"food-delivery/pkg/models"
 	"time"
 )
@@ -32,6 +33,10 @@ func InitHelperRepo(db *DB) *HelperRepo {
 			DeadTime time.Time
 		}),
 	}
+	return globalHelperRepo
+}
+
+func GetHelperRepo() *HelperRepo {
 	return globalHelperRepo
 }
 
@@ -67,26 +72,22 @@ func (r *HelperRepo) LoadDevice(id int64) (models.Device, error) {
 	// TODO вынести время жизни в конфигурацию
 	return device, nil
 }
-func (r *HelperRepo) SaveDevice(device *models.Device) error {
-	ctx := context.Background()
-	tx, err := r.Conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
+func (r *HelperRepo) SaveDevice(device *models.Device, tx *sql.Tx, ctx context.Context) error {
 	var (
 		args = []interface{}{device.LastVisit, device.RefreshKeyHash}
 		id   int64
+		err  error
 	)
-	if device.ID != 0 {
+	if device.ID == 0 {
 		id, err = Saver{
 			Query: "INSERT INTO devices(last_visit, refresh_key, user_id, user_agent) VALUE (?, ?, ?, ?);",
 			Args:  append(args, device.User.ID, device.UserAgent),
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE devices SET last_visit = ?, refresh_key = ? WHERE id = ?;",
 			Args:  args,
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -126,26 +127,22 @@ func (r *HelperRepo) LoadCoordinate(id int64) (models.Coordinate, error) {
 	// TODO вынести время жизни в конфигурацию
 	return coordinate, nil
 }
-func (r *HelperRepo) SaveCoordinate(coordinate *models.Coordinate) error {
-	ctx := context.Background()
-	tx, err := r.Conn.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
+func (r *HelperRepo) SaveCoordinate(coordinate *models.Coordinate, tx *sql.Tx, ctx context.Context) error {
 	var (
 		args = []interface{}{coordinate.Name, coordinate.X, coordinate.Y, coordinate.Humanized}
 		id   int64
+		err  error
 	)
-	if coordinate.ID != 0 {
+	if coordinate.ID == 0 {
 		id, err = Saver{
 			Query: "INSERT INTO coordinates(name, x, y, humanized) VALUE (?, ?, ?, ?);",
 			Args:  args,
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE coordinates SET name = ?, x = ?, y = ?, humanized = ? WHERE  id = ?;",
 			Args:  append(args, coordinate.ID),
-		}.Save(r.DB, tx, ctx)
+		}.Save(tx, ctx)
 	}
 	if err != nil {
 		return err
