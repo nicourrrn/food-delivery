@@ -4,18 +4,12 @@ import (
 	"errors"
 )
 
-var supplierTypes map[int64]SupplierType
-
 type SupplierType *string
 
-func GetSupplType(id int64) SupplierType {
-	return supplierTypes[id]
-}
-func UpdateSupplTypes(newTypes map[int64]string) {
-	supplierTypes = make(map[int64]SupplierType)
-	for id, str := range newTypes {
-		supplierTypes[id] = &str
-	}
+var supplierTypes map[int64]SupplierType
+
+func GetSupplierTypes() *map[int64]SupplierType {
+	return &supplierTypes
 }
 func GetSupplierTypeId(supplierType SupplierType) int64 {
 	for k, v := range supplierTypes {

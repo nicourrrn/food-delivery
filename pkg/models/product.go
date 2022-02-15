@@ -6,40 +6,16 @@ type Ingredient *string
 
 var ingredients map[int64]Ingredient
 
-func GetIngredient(id int64) (Ingredient, error) {
-	ing, ok := ingredients[id]
-	if !ok {
-		return nil, errors.New("ingredient not found")
-	}
-	return ing, nil
-}
-func UpdateIngredients(newTypes map[int64]string) {
-	ingredients = make(map[int64]Ingredient)
-	for id, str := range newTypes {
-		ingredients[id] = &str
-	}
-}
-
-func GetIngredients() map[int64]Ingredient {
-	return ingredients
+func GetIngredients() *map[int64]Ingredient {
+	return &ingredients
 }
 
 type ProductType *string
 
 var productTypes map[int64]ProductType
 
-func GetProductType(id int64) (ProductType, error) {
-	productType, ok := productTypes[id]
-	if !ok {
-		return nil, errors.New("product not found")
-	}
-	return productType, nil
-}
-func UpdateProductTypes(newTypes map[int64]string) {
-	productTypes = make(map[int64]ProductType)
-	for id, str := range newTypes {
-		productTypes[id] = &str
-	}
+func GetProductTypes() *map[int64]ProductType {
+	return &productTypes
 }
 
 func GetProductTypeId(productType ProductType) int64 {
