@@ -1,17 +1,19 @@
 package db
 
 import (
+	"context"
 	"food-delivery/pkg/models"
+	"strconv"
 	"time"
 )
 
 type ClientRepo struct {
 	DB
-	CachedClients map[int]*struct {
+	CachedClients map[int64]*struct {
 		Client   *models.Client
 		DeadTime time.Time
 	}
-	CachedBaskets map[int]*struct {
+	CachedBaskets map[int64]*struct {
 		Basket   *models.Basket
 		DeadTime time.Time
 	}
@@ -22,11 +24,11 @@ var GlobalClientRepo *ClientRepo
 func InitClientRepo(db DB) *ClientRepo {
 	clientRepo := ClientRepo{
 		DB: db,
-		CachedClients: make(map[int]*struct {
+		CachedClients: make(map[int64]*struct {
 			Client   *models.Client
 			DeadTime time.Time
 		}),
-		CachedBaskets: make(map[int]*struct {
+		CachedBaskets: make(map[int64]*struct {
 			Basket   *models.Basket
 			DeadTime time.Time
 		}),
@@ -51,9 +53,9 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 	// TODO вынести время жизни в конфигурацию
 	return client, nil
 }
-func (r *ClientRepo) GetClient(id int) (*models.Client, error) {
+func (r *ClientRepo) GetClient(id int64) (*models.Client, error) {
 	if data, ok := r.CachedClients[id]; !ok {
-		_, err := LoadUserByID(&r.DB, id)
+		_, err := LoadUser(&r.DB, "id", strconv.FormatInt(id, 10))
 		if err != nil {
 			return nil, err
 		}
@@ -63,15 +65,55 @@ func (r *ClientRepo) GetClient(id int) (*models.Client, error) {
 		return data.Client, nil
 	}
 }
+func (r *ClientRepo) SaveClient(client models.Client) error {
+	ctx := context.Background()
+	tx, err := r.Conn.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	err = SaveUser(&r.DB, &client.User, tx, ctx)
+	if err != nil {
+		return err
+	}
+	var (
+		args = []interface{}{client.Phone, client.ID}
+		id   int64
+	)
+	if client.ID != 0 {
+		id, err = Saver{
+			Query: "INSERT INTO client_info(phone, user_id) VALUE (?, ?);",
+			Args:  args,
+		}.Save(&r.DB, tx, ctx)
+	} else {
+		id, err = Saver{
+			Query: "UPDATE client_info SET phone = ? WHERE user_id = ?;",
+			Args:  args,
+		}.Save(&r.DB, tx, ctx)
+	}
+	for _, coordinate := range client.CoordinatesList {
+		err = GlobalHelperRepo.SaveCoordinate(coordinate)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+	if client.ID == 0 {
+		client.ID = id
+	}
+	return nil
+}
 
 // Basket methods
-func (r *ClientRepo) LoadBasket(id int) (models.Basket, error) {
+func (r *ClientRepo) LoadBasket(id int64) (models.Basket, error) {
 	row := r.Conn.QueryRow("SELECT client_id, coordinates_to_id, paid, closed, editable FROM baskets WHERE id = ?", id)
 	basket := models.Basket{
 		ID: id,
 	}
 	var (
-		clientId, coordinateToId int
+		clientId, coordinateToId int64
 	)
 	err := row.Scan(&clientId, &coordinateToId, &basket.Paid, &basket.Closed, &basket.Editable)
 	if err != nil {
@@ -96,7 +138,7 @@ func (r *ClientRepo) LoadBasket(id int) (models.Basket, error) {
 	// TODO вынести время жизни в конфигурацию
 	return basket, nil
 }
-func (r *ClientRepo) GetBasket(id int) (*models.Basket, error) {
+func (r *ClientRepo) GetBasket(id int64) (*models.Basket, error) {
 	if data, ok := r.CachedBaskets[id]; !ok {
 		_, err := r.LoadBasket(id)
 		if err != nil {
@@ -107,6 +149,35 @@ func (r *ClientRepo) GetBasket(id int) (*models.Basket, error) {
 		data.DeadTime = time.Now().Add(time.Hour)
 		return data.Basket, nil
 	}
+}
+func (r *ClientRepo) SaveBasket(basket *models.Basket) error {
+	ctx := context.Background()
+	tx, err := r.Conn.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	var (
+		args = []interface{}{basket.Paid, basket.Closed, basket.Editable}
+		id   int64
+	)
+	if basket.ID != 0 {
+		id, err = Saver{
+			Query: "INSERT INTO baskets(paid, closed, editable, client_id, coordinates_to_id) VALUE (?, ?, ?, ?, ?);",
+			Args:  append(args, basket.Client.ID, basket.CoordinateTo.ID),
+		}.Save(&r.DB, tx, ctx)
+	} else {
+		id, err = Saver{
+			Query: "UPDATE baskets SET paid = ?, closed = ?, editable = ?, final_price = ? WHERE id = ?;",
+			Args:  append(args, basket.FinalPrice, basket.ID),
+		}.Save(&r.DB, tx, ctx)
+	}
+	if err != nil {
+		return err
+	}
+	if basket.ID == 0 {
+		basket.ID = id
+	}
+	return nil
 }
 
 // Garbage interface
