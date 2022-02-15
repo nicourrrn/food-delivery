@@ -30,6 +30,7 @@ func NewBranch(u User, s *Supplier) (Branch, error) {
 		return Branch{}, errors.New("var u is not User")
 	}
 	return Branch{
+		User:     u,
 		Supplier: s,
 		Products: make(map[int64]ProdWithStatus),
 	}, nil

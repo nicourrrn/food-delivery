@@ -28,11 +28,10 @@ func GetProductTypeId(productType ProductType) int64 {
 }
 
 type Product struct {
-	ID       int64
-	Supplier *Supplier
-	Price    float32
-	// TODO переписать на отдельный тип Ингредиент
-	Ingredients       []*string
+	ID                int64
+	Supplier          *Supplier
+	Price             float32
+	Ingredients       []Ingredient
 	Name, Description string
 	Image             string
 	Type              ProductType

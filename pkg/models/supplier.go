@@ -49,8 +49,8 @@ func (s *Supplier) AddProduct(p Product) (*Product, error) {
 	if _, ok := s.Products[p.ID]; ok {
 		err = errors.New("product id was exist, but rewrite")
 	}
-	p.Supplier = s
 	s.Products[p.ID] = &p
+	s.Products[p.ID].Supplier = s
 	return s.Products[p.ID], err
 }
 
