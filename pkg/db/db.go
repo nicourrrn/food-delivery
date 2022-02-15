@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// TODO возможно убрать тип
 type DB struct {
 	Conn *sql.DB
 }
@@ -34,11 +35,23 @@ var keys = []string{
 	"login", "email", "id",
 }
 
-//TODO edit this code
-var userTypes = map[string]int{
-	"Client":   1,
-	"Supplier": 2,
-	"Branch":   3,
+var userTypes = map[string]int64{}
+
+func UT() map[string]int64 {
+	return userTypes
+}
+func InitDB(db *DB) error {
+	InitClientRepo(db)
+	InitHelperRepo(db)
+	_, err := InitSupplierRepo(db)
+	if err != nil {
+		return err
+	}
+	uTypes, err := db.LoadTypes("users_types")
+	for k, v := range uTypes {
+		userTypes[v] = k
+	}
+	return err
 }
 
 func LoadUser(r *DB, key, value string) (models.TypedUser, error) {
@@ -59,52 +72,17 @@ func LoadUser(r *DB, key, value string) (models.TypedUser, error) {
 	var castedUser models.TypedUser
 	switch userType {
 	case "Supplier":
-		castedUser, err = GlobalSupplierRepo.LoadSupplier(user)
+		castedUser, err = globalSupplierRepo.LoadSupplier(user)
 	case "Branch":
-		castedUser, err = GlobalSupplierRepo.LoadBranch(user)
+		castedUser, err = globalSupplierRepo.LoadBranch(user)
 	case "Client":
-		castedUser, err = GlobalClientRepo.LoadClient(user)
+		castedUser, err = globalClientRepo.LoadClient(user)
 	default:
 		err = errors.New("user type not found from db")
 	}
 	return castedUser, err
 }
 
-//func SaveUser(r *DB, user *models.User) error {
-//	if _, ok := userTypes[user.GetType()]; !ok {
-//		return errors.New("user type unknown")
-//	}
-//	ctx := context.Background()
-//	tx, err := r.Conn.BeginTx(ctx, nil)
-//	if err != nil {
-//		return err
-//	}
-//	var (
-//		args  = []interface{}{user.Name, user.Login, user.Email, user.PassHash}
-//		query string
-//	)
-//	if user.ID != 0 {
-//		query = "INSERT INTO users(name, login, email, pass_hash, user_type_id) VALUE (?, ?, ?, ?, ?);"
-//		args = append(args, userTypes[user.GetType()])
-//	} else {
-//		query = "UPDATE users SET name = ?, login = ?, email = ?, pass_hash = ? WHERE id = ?;"
-//		args = append(args, user.ID)
-//	}
-//	result, err := tx.ExecContext(ctx, query, args...)
-//	if err != nil {
-//		err = tx.Rollback()
-//		if err != nil {
-//			return err
-//		}
-//		return err
-//	}
-//	id, err := result.LastInsertId()
-//	if err == nil {
-//		log.Println(err)
-//		user.ID = id
-//	}
-//	return nil
-//}
 func SaveUser(db *DB, user *models.User, tx *sql.Tx, ctx context.Context) error {
 	if _, ok := userTypes[user.GetType()]; !ok {
 		return errors.New("user type unknown")
@@ -158,9 +136,29 @@ type Garbage interface {
 	GarbageCollector()
 }
 
-func (r *DB) RunGarbage(Garbagers ...Garbage) {
+func (db *DB) RunGarbage(Garbagers ...Garbage) {
 	time.Sleep(time.Minute)
 	for _, g := range Garbagers {
 		g.GarbageCollector()
 	}
+}
+
+func (db *DB) LoadTypes(tableName string) (map[int64]string, error) {
+	rows, err := db.Conn.Query(fmt.Sprintf("SELECT id, name FROM %s", tableName))
+	if err != nil {
+		return nil, err
+	}
+	var (
+		id   int64
+		name string
+	)
+	newTypes := make(map[int64]string)
+	for rows.Next() {
+		err = rows.Scan(&id, &name)
+		if err != nil {
+			return nil, err
+		}
+		newTypes[id] = name
+	}
+	return newTypes, nil
 }

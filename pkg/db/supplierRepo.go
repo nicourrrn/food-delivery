@@ -3,16 +3,14 @@ package db
 import (
 	"context"
 	"errors"
-	"fmt"
 	"food-delivery/pkg/models"
 	"log"
 	"strconv"
-	"sync"
 	"time"
 )
 
 type SupplierRepo struct {
-	DB
+	*DB
 	CachedSupplier map[int64]*struct {
 		Supplier *models.Supplier
 		DeadTime time.Time
@@ -27,10 +25,10 @@ type SupplierRepo struct {
 	}
 }
 
-var GlobalSupplierRepo *SupplierRepo
+var globalSupplierRepo *SupplierRepo
 
-func InitSupplierRepo(db DB, group *sync.WaitGroup) (*SupplierRepo, error) {
-	supplierRepo := SupplierRepo{
+func InitSupplierRepo(db *DB) (*SupplierRepo, error) {
+	globalSupplierRepo = &SupplierRepo{
 		DB: db,
 		CachedSupplier: make(map[int64]*struct {
 			Supplier *models.Supplier
@@ -46,33 +44,41 @@ func InitSupplierRepo(db DB, group *sync.WaitGroup) (*SupplierRepo, error) {
 		}),
 	}
 
-	newSupplierTypes, err := supplierRepo.LoadTypes("supplier_types")
+	newSupplierTypes, err := globalSupplierRepo.LoadTypes("supplier_types")
 	if err != nil {
 		return nil, err
 	}
-	models.UpdateSupplTypes(newSupplierTypes)
+	supplierTypes := *models.GetSupplierTypes()
+	for k, v := range newSupplierTypes {
+		supplierTypes[k] = &v
+	}
 
-	newProductTypes, err := supplierRepo.LoadTypes("products_types")
+	newProductTypes, err := globalSupplierRepo.LoadTypes("products_types")
 	if err != nil {
 		return nil, err
 	}
-	models.UpdateProductTypes(newProductTypes)
+	productTypes := *models.GetProductTypes()
+	for k, v := range newProductTypes {
+		productTypes[k] = &v
+	}
 
-	newIngredients, err := supplierRepo.LoadTypes("ingredients")
+	newIngredients, err := globalSupplierRepo.LoadTypes("ingredients")
 	if err != nil {
 		return nil, err
 	}
-	models.UpdateIngredients(newIngredients)
+	ingredients := *models.GetIngredients()
+	for k, v := range newIngredients {
+		ingredients[k] = &v
+	}
 
-	GlobalSupplierRepo = &supplierRepo
-	return GlobalSupplierRepo, nil
+	return globalSupplierRepo, nil
 }
 
 // Branch methods
 func (r *SupplierRepo) GetBranch(id int64) (*models.Branch, error) {
 	if data, ok := r.CachedBranch[id]; !ok {
 		//_, err := r.LoadUser(id)
-		_, err := LoadUser(&r.DB, "id", strconv.FormatInt(id, 10))
+		_, err := LoadUser(r.DB, "id", strconv.FormatInt(id, 10))
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +100,7 @@ func (r *SupplierRepo) LoadBranch(user models.User) (models.Branch, error) {
 	if err != nil {
 		return models.Branch{}, err
 	}
-	coordinate, err := GlobalHelperRepo.GetCoordinate(coordinatesId)
+	coordinate, err := globalHelperRepo.GetCoordinate(coordinatesId)
 	if err != nil {
 		log.Println(err, "when load branch from coordinate")
 		return models.Branch{}, err
@@ -113,7 +119,7 @@ func (r *SupplierRepo) SaveBranch(branch models.Branch) error {
 	if err != nil {
 		return err
 	}
-	err = SaveUser(&r.DB, &branch.User, tx, ctx)
+	err = SaveUser(r.DB, &branch.User, tx, ctx)
 	if err != nil {
 		return err
 	}
@@ -125,12 +131,12 @@ func (r *SupplierRepo) SaveBranch(branch models.Branch) error {
 		id, err = Saver{
 			Query: "INSERT INTO supl_branches(image, open_time, close_time, supplier_id, coordinate_id,) VALUE (?, ?, ?, ?, ?);",
 			Args:  append(args, branch.Supplier.ID, branch.Coordinate.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE supl_branches SET image = ?, open_time = ?, close_time = ? WHERE id = ?;",
 			Args:  append(args, branch.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -144,7 +150,7 @@ func (r *SupplierRepo) SaveBranch(branch models.Branch) error {
 // Supplier methods
 func (r *SupplierRepo) GetSupplier(id int64) (*models.Supplier, error) {
 	if data, ok := r.CachedSupplier[id]; !ok {
-		_, err := LoadUser(&r.DB, "id", strconv.FormatInt(id, 10))
+		_, err := LoadUser(r.DB, "id", strconv.FormatInt(id, 10))
 		if err != nil {
 			return nil, err
 		}
@@ -162,7 +168,7 @@ func (r *SupplierRepo) LoadSupplier(user models.User) (models.Supplier, error) {
 	if err != nil {
 		return models.Supplier{}, err
 	}
-	supplier.Type = models.GetSupplType(supplTypeId)
+	supplier.Type = (*models.GetSupplierTypes())[supplTypeId]
 	r.CachedSupplier[user.ID] = &struct {
 		Supplier *models.Supplier
 		DeadTime time.Time
@@ -176,7 +182,7 @@ func (r SupplierRepo) SaveSupplier(supplier *models.Supplier) error {
 	if err != nil {
 		return err
 	}
-	err = SaveUser(&r.DB, &supplier.User, tx, ctx)
+	err = SaveUser(r.DB, &supplier.User, tx, ctx)
 	if err != nil {
 		return err
 	}
@@ -192,12 +198,12 @@ func (r SupplierRepo) SaveSupplier(supplier *models.Supplier) error {
 		id, err = Saver{
 			Query: "INSERT INTO supplier_info(description, supplier_type_id, image, user_id) VALUE (?, ?, ?, ?);",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE supplier_info SET description = ?, supplier_type_id = ?, image = ? WHERE user_id = ?;",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -234,9 +240,10 @@ func (r *SupplierRepo) LoadProduct(id int64) (models.Product, error) {
 	}
 
 	// Product setup
-	product.Type, err = models.GetProductType(typeId)
-	if err != nil {
-		return models.Product{}, err
+	var ok bool
+	product.Type, ok = (*models.GetProductTypes())[typeId]
+	if !ok {
+		return models.Product{}, errors.New("product not found")
 	}
 	product.Supplier, err = r.GetSupplier(supplierId)
 	if err != nil {
@@ -271,12 +278,12 @@ func (r *SupplierRepo) SaveProduct(product *models.Product) error {
 		id, err = Saver{
 			Query: "INSERT INTO products(description, image, price, type_id, supl_id, name) VALUE (?, ?, ?, ?, ?, ?);",
 			Args:  append(args, typeId, product.Supplier.ID, product.Name),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE products SET description = ?, image = ?, price = ? WHERE id = ?;",
 			Args:  append(args, product.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -299,15 +306,16 @@ func (r *SupplierRepo) GetIngredients(product *models.Product) ([]*string, error
 	var (
 		ingredientId int64
 		ingredient   models.Ingredient
+		ok           bool
 	)
 	for rows.Next() {
 		err = rows.Scan(&ingredientId)
 		if err != nil {
 			return nil, err
 		}
-		ingredient, err = models.GetIngredient(ingredientId)
-		if err != nil {
-			return nil, err
+		ingredient, ok = (*models.GetIngredients())[ingredientId]
+		if !ok {
+			return nil, errors.New("ingredient not found")
 		}
 		product.Ingredients = append(product.Ingredients, ingredient)
 	}
@@ -328,7 +336,7 @@ func (r *SupplierRepo) SaveIngredients(ingredients []models.Ingredient) error {
 		if err != nil {
 			return err
 		}
-		globalIngredients[id] = i
+		(*globalIngredients)[id] = i
 	}
 	// TODO update ingredients
 	//models.UpdateIngredients(globalIngredients)
@@ -405,22 +413,3 @@ func (r *SupplierRepo) GarbageCollector() {
 }
 
 // Helper func
-func (r *SupplierRepo) LoadTypes(tableName string) (map[int64]string, error) {
-	rows, err := r.Conn.Query(fmt.Sprintf("SELECT id, name FROM %s", tableName))
-	if err != nil {
-		return nil, err
-	}
-	var (
-		id   int64
-		name string
-	)
-	newTypes := make(map[int64]string)
-	for rows.Next() {
-		err = rows.Scan(&id, &name)
-		if err != nil {
-			return nil, err
-		}
-		newTypes[id] = name
-	}
-	return newTypes, nil
-}

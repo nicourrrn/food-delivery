@@ -7,7 +7,7 @@ import (
 )
 
 type HelperRepo struct {
-	DB
+	*DB
 	CachedDevices map[int64]*struct {
 		Device   *models.Device
 		DeadTime time.Time
@@ -18,10 +18,11 @@ type HelperRepo struct {
 	}
 }
 
-var GlobalHelperRepo HelperRepo
+var globalHelperRepo *HelperRepo
 
-func InitHelperRepo() {
-	helperRepo := HelperRepo{
+func InitHelperRepo(db *DB) *HelperRepo {
+	globalHelperRepo = &HelperRepo{
+		DB: db,
 		CachedCoordinates: make(map[int64]*struct {
 			Coordinate *models.Coordinate
 			DeadTime   time.Time
@@ -31,7 +32,7 @@ func InitHelperRepo() {
 			DeadTime time.Time
 		}),
 	}
-	GlobalHelperRepo = helperRepo
+	return globalHelperRepo
 }
 
 // Device methods
@@ -59,7 +60,6 @@ func (r *HelperRepo) LoadDevice(id int64) (models.Device, error) {
 	if err != nil {
 		return models.Device{}, err
 	}
-
 	r.CachedDevices[id] = &struct {
 		Device   *models.Device
 		DeadTime time.Time
@@ -81,12 +81,12 @@ func (r *HelperRepo) SaveDevice(device *models.Device) error {
 		id, err = Saver{
 			Query: "INSERT INTO devices(last_visit, refresh_key, user_id, user_agent) VALUE (?, ?, ?, ?);",
 			Args:  append(args, device.User.ID, device.UserAgent),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE devices SET last_visit = ?, refresh_key = ? WHERE id = ?;",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err
@@ -140,12 +140,12 @@ func (r *HelperRepo) SaveCoordinate(coordinate *models.Coordinate) error {
 		id, err = Saver{
 			Query: "INSERT INTO coordinates(name, x, y, humanized) VALUE (?, ?, ?, ?);",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE coordinates SET name = ?, x = ?, y = ?, humanized = ? WHERE  id = ?;",
 			Args:  append(args, coordinate.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err

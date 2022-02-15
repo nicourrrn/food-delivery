@@ -8,7 +8,7 @@ import (
 )
 
 type ClientRepo struct {
-	DB
+	*DB
 	CachedClients map[int64]*struct {
 		Client   *models.Client
 		DeadTime time.Time
@@ -19,10 +19,10 @@ type ClientRepo struct {
 	}
 }
 
-var GlobalClientRepo *ClientRepo
+var globalClientRepo *ClientRepo
 
-func InitClientRepo(db DB) *ClientRepo {
-	clientRepo := ClientRepo{
+func InitClientRepo(db *DB) *ClientRepo {
+	globalClientRepo = &ClientRepo{
 		DB: db,
 		CachedClients: make(map[int64]*struct {
 			Client   *models.Client
@@ -33,8 +33,10 @@ func InitClientRepo(db DB) *ClientRepo {
 			DeadTime time.Time
 		}),
 	}
-	GlobalClientRepo = &clientRepo
-	return GlobalClientRepo
+	return globalClientRepo
+}
+func GetClientRepo() *ClientRepo {
+	return globalClientRepo
 }
 
 // Client methods
@@ -45,7 +47,7 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 	if err != nil {
 		return models.Client{}, err
 	}
-	GlobalHelperRepo.GetCoordinatesByClient(&client)
+	globalHelperRepo.GetCoordinatesByClient(&client)
 	r.CachedClients[user.ID] = &struct {
 		Client   *models.Client
 		DeadTime time.Time
@@ -55,7 +57,7 @@ func (r *ClientRepo) LoadClient(user models.User) (models.Client, error) {
 }
 func (r *ClientRepo) GetClient(id int64) (*models.Client, error) {
 	if data, ok := r.CachedClients[id]; !ok {
-		_, err := LoadUser(&r.DB, "id", strconv.FormatInt(id, 10))
+		_, err := LoadUser(r.DB, "id", strconv.FormatInt(id, 10))
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +73,7 @@ func (r *ClientRepo) SaveClient(client models.Client) error {
 	if err != nil {
 		return err
 	}
-	err = SaveUser(&r.DB, &client.User, tx, ctx)
+	err = SaveUser(r.DB, &client.User, tx, ctx)
 	if err != nil {
 		return err
 	}
@@ -83,15 +85,15 @@ func (r *ClientRepo) SaveClient(client models.Client) error {
 		id, err = Saver{
 			Query: "INSERT INTO client_info(phone, user_id) VALUE (?, ?);",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE client_info SET phone = ? WHERE user_id = ?;",
 			Args:  args,
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	for _, coordinate := range client.CoordinatesList {
-		err = GlobalHelperRepo.SaveCoordinate(coordinate)
+		err = globalHelperRepo.SaveCoordinate(coordinate)
 		if err != nil {
 			return err
 		}
@@ -119,7 +121,7 @@ func (r *ClientRepo) LoadBasket(id int64) (models.Basket, error) {
 	if err != nil {
 		return models.Basket{}, err
 	}
-	basket.CoordinateTo, err = GlobalHelperRepo.GetCoordinate(coordinateToId)
+	basket.CoordinateTo, err = globalHelperRepo.GetCoordinate(coordinateToId)
 	if err != nil {
 		return models.Basket{}, err
 	}
@@ -127,7 +129,7 @@ func (r *ClientRepo) LoadBasket(id int64) (models.Basket, error) {
 	if err != nil {
 		return models.Basket{}, err
 	}
-	_, err = GlobalSupplierRepo.GetProductsForBasket(&basket)
+	_, err = globalSupplierRepo.GetProductsForBasket(&basket)
 	if err != nil {
 		return models.Basket{}, err
 	}
@@ -164,12 +166,12 @@ func (r *ClientRepo) SaveBasket(basket *models.Basket) error {
 		id, err = Saver{
 			Query: "INSERT INTO baskets(paid, closed, editable, client_id, coordinates_to_id) VALUE (?, ?, ?, ?, ?);",
 			Args:  append(args, basket.Client.ID, basket.CoordinateTo.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	} else {
 		id, err = Saver{
 			Query: "UPDATE baskets SET paid = ?, closed = ?, editable = ?, final_price = ? WHERE id = ?;",
 			Args:  append(args, basket.FinalPrice, basket.ID),
-		}.Save(&r.DB, tx, ctx)
+		}.Save(r.DB, tx, ctx)
 	}
 	if err != nil {
 		return err
