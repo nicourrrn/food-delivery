@@ -18,7 +18,7 @@ type Branch struct {
 	WorkingHour struct {
 		Open, Close string
 	}
-	Products map[int]ProdWithStatus
+	Products map[int64]ProdWithStatus
 }
 
 func (b Branch) GetType() string {
@@ -31,11 +31,11 @@ func NewBranch(u User, s *Supplier) (Branch, error) {
 	}
 	return Branch{
 		Supplier: s,
-		Products: make(map[int]ProdWithStatus),
+		Products: make(map[int64]ProdWithStatus),
 	}, nil
 }
 
-func (b *Branch) AddProductFromSupplier(id int) (*Product, error) {
+func (b *Branch) AddProductFromSupplier(id int64) (*Product, error) {
 	product, ok := b.Supplier.Products[id]
 	if !ok {
 		return nil, errors.New("product is exist from supplier")
@@ -43,7 +43,7 @@ func (b *Branch) AddProductFromSupplier(id int) (*Product, error) {
 	b.Products[id] = ProdWithStatus{Exist: true, Product: product}
 	return product, nil
 }
-func (b *Branch) ChangeProductExist(id int) error {
+func (b *Branch) ChangeProductExist(id int64) error {
 	productInfo, ok := b.Products[id]
 	if !ok {
 		return errors.New("product not found")

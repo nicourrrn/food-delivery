@@ -4,27 +4,35 @@ import (
 	"errors"
 )
 
+var supplierTypes map[int64]SupplierType
+
 type SupplierType *string
 
-func GetSupplType(id int) SupplierType {
+func GetSupplType(id int64) SupplierType {
 	return supplierTypes[id]
 }
-func UpdateSupplTypes(newTypes map[int]string) {
-	supplierTypes = make(map[int]SupplierType)
+func UpdateSupplTypes(newTypes map[int64]string) {
+	supplierTypes = make(map[int64]SupplierType)
 	for id, str := range newTypes {
 		supplierTypes[id] = &str
 	}
 }
-
-var supplierTypes map[int]SupplierType
+func GetSupplierTypeId(supplierType SupplierType) int64 {
+	for k, v := range supplierTypes {
+		if v == supplierType {
+			return k
+		}
+	}
+	return 0
+}
 
 type Supplier struct {
 	User
-	Branches    map[int]*Branch
+	Branches    map[int64]*Branch
 	Description string
 	Type        SupplierType
 	Image       string
-	Products    map[int]*Product // key -- id for Product
+	Products    map[int64]*Product // key -- id for Product
 }
 
 func NewSupplier(u User, supplierType SupplierType) (Supplier, error) {
@@ -35,8 +43,8 @@ func NewSupplier(u User, supplierType SupplierType) (Supplier, error) {
 		return Supplier{}, errors.New("var u is not User")
 	}
 	return Supplier{User: u, Type: supplierType,
-		Branches: make(map[int]*Branch),
-		Products: make(map[int]*Product)}, nil
+		Branches: make(map[int64]*Branch),
+		Products: make(map[int64]*Product)}, nil
 }
 
 func (s *Supplier) AddProduct(p Product) (*Product, error) {
@@ -61,7 +69,7 @@ func (s *Supplier) MakeBranch(u User) (*Branch, error) {
 	return s.Branches[u.ID], nil
 }
 
-func (s *Supplier) GetBranch(id int) (*Branch, error) {
+func (s *Supplier) GetBranch(id int64) (*Branch, error) {
 	branch, ok := s.Branches[id]
 	if !ok {
 		return nil, errors.New("branch not found")

@@ -5,7 +5,7 @@ import (
 )
 
 type Basket struct {
-	ID                     int
+	ID                     int64
 	FinalPrice             float32
 	Client                 *Client
 	CoordinateTo           *Coordinate

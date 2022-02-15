@@ -3,7 +3,7 @@ package models
 import "time"
 
 type Device struct {
-	ID             int
+	ID             int64
 	User           User
 	LastVisit      time.Time
 	UserAgent      string
