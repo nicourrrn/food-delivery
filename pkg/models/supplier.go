@@ -33,9 +33,6 @@ func NewSupplier(u User, supplierType SupplierType) (Supplier, error) {
 	if supplierType == nil {
 		return Supplier{}, errors.New("type is nil")
 	}
-	if u.GetType() != "User" {
-		return Supplier{}, errors.New("var u is not User")
-	}
 	return Supplier{User: u, Type: supplierType,
 		Branches: make(map[int64]*Branch),
 		Products: make(map[int64]*Product)}, nil
@@ -73,4 +70,8 @@ func (s *Supplier) GetBranch(id int64) (*Branch, error) {
 
 func (s Supplier) GetType() string {
 	return "Supplier"
+}
+
+func (s Supplier) GetUser() User {
+	return s.User
 }

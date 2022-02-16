@@ -24,4 +24,5 @@ func (u User) GetType() string {
 
 type TypedUser interface {
 	GetType() string
+	GetUser() User
 }

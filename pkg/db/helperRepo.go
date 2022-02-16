@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"food-delivery/pkg/models"
+	"strings"
 	"time"
 )
 
@@ -175,6 +176,41 @@ func (r *HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordin
 	}
 	c.CoordinatesList = coordinates
 	return coordinates, nil
+}
+func (r *HelperRepo) ConnectCoordinateWithClient(c *models.Client, tx *sql.Tx, ctx context.Context) error {
+	saverCoordinates, err := r.GetCoordinatesByClient(c)
+	if err != nil {
+		return err
+	}
+	var (
+		queryCount = 0
+		args       = make([]interface{}, 0)
+	)
+	for _, coordinate := range c.CoordinatesList {
+		exist := false
+		for _, savedCoordinate := range saverCoordinates {
+			if savedCoordinate == coordinate {
+				exist = true
+				break
+			}
+		}
+		if exist {
+			continue
+		}
+		queryCount++
+		args = append(args, c.ID, coordinate.ID)
+	}
+	if queryCount == 0 {
+		return nil
+	}
+	_, err = Saver{
+		Query: "INSERT INTO client_coordinates(client_id, coordinate_id)  VALUES " + strings.Repeat("(?, ?),", queryCount)[:7*queryCount-1],
+		Args:  args,
+	}.Save(tx, ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *HelperRepo) GarbageCollector() {

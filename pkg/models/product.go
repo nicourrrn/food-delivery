@@ -10,6 +10,15 @@ func GetIngredients() *map[int64]Ingredient {
 	return &ingredients
 }
 
+func GetIngredientId(ingredient Ingredient) int64 {
+	for k, v := range ingredients {
+		if v == ingredient {
+			return k
+		}
+	}
+	return 0
+}
+
 type ProductType *string
 
 var productTypes map[int64]ProductType

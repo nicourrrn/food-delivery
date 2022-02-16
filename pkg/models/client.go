@@ -36,3 +36,7 @@ func (c *Client) MakeBasket(coordinate *Coordinate) (Basket, error) {
 func (c *Client) AddCoordinate(coordinate *Coordinate) {
 	c.CoordinatesList = append(c.CoordinatesList, coordinate)
 }
+
+func (c Client) GetUser() User {
+	return c.User
+}

@@ -52,3 +52,7 @@ func (b *Branch) ChangeProductExist(id int64) error {
 	b.Products[id] = ProdWithStatus{Exist: !productInfo.Exist, Product: productInfo.Product}
 	return nil
 }
+
+func (b Branch) GetUser() User {
+	return b.User
+}
