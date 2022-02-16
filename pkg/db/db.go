@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"strings"
 	"time"
 )
 
@@ -29,9 +28,9 @@ func NewDB(login, password, dbName string) (DB, error) {
 }
 
 func InitDB(db *DB) error {
-	InitClientRepo(db)
+	InitUserRepo(db)
 	InitHelperRepo(db)
-	_, err := InitSupplierRepo(db)
+	_, err := InitProductRepo(db)
 	if err != nil {
 		return err
 	}
@@ -42,7 +41,6 @@ func InitDB(db *DB) error {
 	for k, v := range uTypes {
 		userTypes[v] = k
 	}
-	err = globalSupplierRepo.LoadIngredient()
 	if err != nil {
 		return err
 	}
@@ -68,9 +66,9 @@ type Saver struct {
 func (s Saver) Save(tx *sql.Tx, ctx context.Context) (int64, error) {
 	result, err := tx.ExecContext(ctx, s.Query, s.Args...)
 	if err != nil {
-		if strings.HasPrefix(err.Error(), "Error 1062") {
-			return 0, err
-		}
+		//if strings.HasPrefix(err.Error(), "Error 1062") {
+		//	return 0, err
+		//}
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			return 0, err

@@ -17,12 +17,3 @@ func NewUser(login, pass string) (User, error) {
 	}
 	return User{Login: login, PassHash: string(passHash)}, nil
 }
-
-func (u User) GetType() string {
-	return "User"
-}
-
-type TypedUser interface {
-	GetType() string
-	GetUser() User
-}

@@ -11,10 +11,6 @@ type Client struct {
 func (c *Client) GetPassHash() {
 }
 
-func (c Client) GetType() string {
-	return "Client"
-}
-
 func NewClient(u User) Client {
 	return Client{
 		User:            u,

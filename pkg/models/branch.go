@@ -21,14 +21,7 @@ type Branch struct {
 	Products map[int64]ProdWithStatus
 }
 
-func (b Branch) GetType() string {
-	return "Branch"
-}
-
 func NewBranch(u User, s *Supplier) (Branch, error) {
-	if u.GetType() != "User" {
-		return Branch{}, errors.New("var u is not User")
-	}
 	return Branch{
 		User:     u,
 		Supplier: s,
@@ -36,7 +29,7 @@ func NewBranch(u User, s *Supplier) (Branch, error) {
 	}, nil
 }
 
-func (b *Branch) AddProductFromSupplier(id int64) (*Product, error) {
+func (b *Branch) AddProductFromSupplier(id int64, isExist bool) (*Product, error) {
 	product, ok := b.Supplier.Products[id]
 	if !ok {
 		return nil, errors.New("product is exist from supplier")

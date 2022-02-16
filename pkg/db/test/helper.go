@@ -91,7 +91,7 @@ func GenerateFakeData() FakeData {
 				log.Fatalln(err)
 			}
 			for c := 0; c < 2; c++ {
-				prodPtr, err := branch.AddProductFromSupplier(int64(rand.Int() % 6))
+				prodPtr, err := branch.AddProductFromSupplier(int64(rand.Int()%6), true)
 				if err != nil {
 					log.Fatalln(err)
 				}

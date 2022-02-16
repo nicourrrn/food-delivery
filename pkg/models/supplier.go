@@ -67,11 +67,3 @@ func (s *Supplier) GetBranch(id int64) (*Branch, error) {
 	}
 	return branch, nil
 }
-
-func (s Supplier) GetType() string {
-	return "Supplier"
-}
-
-func (s Supplier) GetUser() User {
-	return s.User
-}

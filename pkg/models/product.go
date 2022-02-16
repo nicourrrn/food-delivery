@@ -1,6 +1,8 @@
 package models
 
-import "errors"
+import (
+	"errors"
+)
 
 type Ingredient *string
 
@@ -12,7 +14,7 @@ func GetIngredients() *map[int64]Ingredient {
 
 func GetIngredientId(ingredient Ingredient) int64 {
 	for k, v := range ingredients {
-		if v == ingredient {
+		if *v == *ingredient {
 			return k
 		}
 	}
