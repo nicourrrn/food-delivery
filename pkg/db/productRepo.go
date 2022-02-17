@@ -181,23 +181,22 @@ func (r *ProductRepo) ConnectProductWithIngredient(product models.Product, tx *s
 }
 func (r *ProductRepo) SaveIngredients(ingredients []models.Ingredient, tx *sql.Tx, ctx context.Context) error {
 	saver := Saver{
-		Query: "INSERT INTO ingredients(name) VALUES " +
-			strings.Repeat(",(?)", len(ingredients))[1:] +
-			" ON DUPLICATE KEY UPDATE name=name;",
+		Query: "INSERT IGNORE INTO ingredients(name) VALUES " +
+			strings.Repeat(",(?)", len(ingredients))[1:],
 		Args: make([]interface{}, 0),
 	}
 	for _, ingredient := range ingredients {
 		saver.Args = append(saver.Args, *ingredient)
 	}
-	lastId, err := saver.Save(tx, ctx)
+	firstId, err := saver.Save(tx, ctx)
 	if err != nil {
 		return err
 	}
-	var firstId int64
-	if err = r.Conn.QueryRow("SELECT MAX(id) FROM ingredients").Scan(&firstId); err != nil {
+	var lastId int64
+	if err = tx.QueryRow("SELECT MAX(id) FROM ingredients").Scan(&lastId); err != nil {
 		return err
 	}
-	nameRows, err := r.Conn.Query("SELECT id, name  FROM ingredients WHERE id >= ? AND  id <= ?", firstId, lastId)
+	nameRows, err := tx.Query("SELECT id, name  FROM ingredients WHERE id >= ? AND  id <= ?", firstId, lastId)
 	if err != nil {
 		return err
 	}
