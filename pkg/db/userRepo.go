@@ -144,13 +144,13 @@ func (r *UserRepo) loadClient(user models.User) (models.Client, error) {
 	r.AddClient(client)
 	return client, nil
 }
-func (r *UserRepo) SaveClient(client *models.Client, tx *sql.Tx, ctx context.Context) error {
+func (r *UserRepo) SaveClient(client *models.Client, tx *sql.Tx, ctx context.Context) (int64, error) {
 	newId, err := r.SaveUser(client.User, "Client", tx, ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	var (
-		args  = []interface{}{client.Phone, client.ID}
+		args  = []interface{}{client.Phone, newId}
 		saver Saver
 	)
 	if client.ID == 0 {
@@ -164,12 +164,11 @@ func (r *UserRepo) SaveClient(client *models.Client, tx *sql.Tx, ctx context.Con
 			Args:  args,
 		}
 	}
-	client.ID = newId
 	_, err = saver.Save(tx, ctx)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return err
+	return newId, err
 }
 func (r *UserRepo) AddClient(client models.Client) {
 	r.CachedClients[client.ID] = &struct {

@@ -73,30 +73,23 @@ func (r *HelperRepo) LoadDevice(id int64) (models.Device, error) {
 	// TODO вынести время жизни в конфигурацию
 	return device, nil
 }
-func (r *HelperRepo) SaveDevice(device *models.Device, tx *sql.Tx, ctx context.Context) error {
+func (r *HelperRepo) SaveDevice(device *models.Device, tx *sql.Tx, ctx context.Context) (int64, error) {
 	var (
-		args = []interface{}{device.LastVisit, device.RefreshKeyHash}
-		id   int64
-		err  error
+		args  = []interface{}{device.LastVisit, device.RefreshKeyHash}
+		saver Saver
 	)
 	if device.ID == 0 {
-		id, err = Saver{
+		saver = Saver{
 			Query: "INSERT INTO devices(last_visit, refresh_key, user_id, user_agent) VALUE (?, ?, ?, ?);",
 			Args:  append(args, device.User.ID, device.UserAgent),
-		}.Save(tx, ctx)
+		}
 	} else {
-		id, err = Saver{
+		saver = Saver{
 			Query: "UPDATE devices SET last_visit = ?, refresh_key = ? WHERE id = ?;",
 			Args:  args,
-		}.Save(tx, ctx)
+		}
 	}
-	if err != nil {
-		return err
-	}
-	if device.ID == 0 {
-		device.ID = id
-	}
-	return nil
+	return saver.Save(tx, ctx)
 }
 
 // Coordinates methods
@@ -128,30 +121,23 @@ func (r *HelperRepo) LoadCoordinate(id int64) (models.Coordinate, error) {
 	// TODO вынести время жизни в конфигурацию
 	return coordinate, nil
 }
-func (r *HelperRepo) SaveCoordinate(coordinate *models.Coordinate, tx *sql.Tx, ctx context.Context) error {
+func (r *HelperRepo) SaveCoordinate(coordinate models.Coordinate, tx *sql.Tx, ctx context.Context) (int64, error) {
 	var (
-		args = []interface{}{coordinate.Name, coordinate.X, coordinate.Y, coordinate.Humanized}
-		id   int64
-		err  error
+		args  = []interface{}{coordinate.Name, coordinate.X, coordinate.Y, coordinate.Humanized}
+		saver Saver
 	)
 	if coordinate.ID == 0 {
-		id, err = Saver{
+		saver = Saver{
 			Query: "INSERT INTO coordinates(name, x, y, humanized) VALUE (?, ?, ?, ?);",
 			Args:  args,
-		}.Save(tx, ctx)
+		}
 	} else {
-		id, err = Saver{
+		saver = Saver{
 			Query: "UPDATE coordinates SET name = ?, x = ?, y = ?, humanized = ? WHERE  id = ?;",
 			Args:  append(args, coordinate.ID),
-		}.Save(tx, ctx)
+		}
 	}
-	if err != nil {
-		return err
-	}
-	if coordinate.ID == 0 {
-		coordinate.ID = id
-	}
-	return nil
+	return saver.Save(tx, ctx)
 }
 func (r *HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordinate, error) {
 	rows, err := r.Conn.Query("SELECT coordinate_id FROM client_coordinates WHERE client_id = ?", c.ID)
@@ -178,39 +164,44 @@ func (r *HelperRepo) GetCoordinatesByClient(c *models.Client) ([]*models.Coordin
 	return coordinates, nil
 }
 func (r *HelperRepo) ConnectCoordinateWithClient(c *models.Client, tx *sql.Tx, ctx context.Context) error {
-	saverCoordinates, err := r.GetCoordinatesByClient(c)
+	saverCoordinatesIds := make([]models.Coordinate, 0)
+	//TODO переписать алгоримт копирования (сору не работает)
+	for _, coordinate := range c.CoordinatesList {
+		newCoordinate := *coordinate
+		saverCoordinatesIds = append(saverCoordinatesIds, newCoordinate)
+	}
+	rows, err := tx.Query("SELECT coordinate_id FROM client_coordinates WHERE client_id = ?", c.ID)
 	if err != nil {
 		return err
 	}
-	var (
-		queryCount = 0
-		args       = make([]interface{}, 0)
-	)
-	for _, coordinate := range c.CoordinatesList {
-		exist := false
-		for _, savedCoordinate := range saverCoordinates {
-			if savedCoordinate == coordinate {
-				exist = true
-				break
+
+	var coordId int64
+	for rows.Next() {
+		if err = rows.Scan(&coordId); err != nil {
+			return err
+		}
+		for i, coordinate := range saverCoordinatesIds {
+			if coordId == coordinate.ID {
+				saverCoordinatesIds = append(saverCoordinatesIds[:i], saverCoordinatesIds[i+1:]...)
 			}
 		}
-		if exist {
-			continue
-		}
-		queryCount++
-		args = append(args, c.ID, coordinate.ID)
 	}
+
+	var (
+		queryCount = len(saverCoordinatesIds)
+		args       = make([]interface{}, 0)
+	)
 	if queryCount == 0 {
 		return nil
+	}
+	for _, coordinate := range saverCoordinatesIds {
+		args = append(args, c.ID, coordinate.ID)
 	}
 	_, err = Saver{
 		Query: "INSERT INTO client_coordinates(client_id, coordinate_id)  VALUES " + strings.Repeat("(?, ?),", queryCount)[:7*queryCount-1],
 		Args:  args,
 	}.Save(tx, ctx)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 func (r *HelperRepo) GarbageCollector() {

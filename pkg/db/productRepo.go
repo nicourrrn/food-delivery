@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"food-delivery/pkg/models"
-	"log"
 	"strings"
 	"time"
 )
@@ -115,7 +114,7 @@ func (r *ProductRepo) SaveProduct(product *models.Product, tx *sql.Tx, ctx conte
 	)
 	if product.ID == 0 {
 		saver = Saver{
-			Query: "INSERT INTO products(description, image, price, type_id, supl_id, name) VALUE (?, ?, ?, ?, ?, ?);",
+			Query: "INSERT INTO products(description, image, price, type_id, supplier_id, name) VALUE (?, ?, ?, ?, ?, ?);",
 			Args:  append(args, typeId, product.Supplier.ID, product.Name),
 		}
 	} else {
@@ -169,7 +168,6 @@ func (r *ProductRepo) ConnectProductWithIngredient(product models.Product, tx *s
 
 	for _, v := range product.Ingredients {
 		id := models.GetIngredientId(v)
-		log.Println(id, *v)
 		args = append(args, product.ID, id)
 	}
 	_, err := Saver{
@@ -210,7 +208,6 @@ func (r *ProductRepo) SaveIngredients(ingredients []models.Ingredient, tx *sql.T
 			return err
 		}
 		newName := name
-		log.Println("Saved: ", newName, id)
 		globalIngredients[id] = &newName
 	}
 	return nil
@@ -280,6 +277,20 @@ func (r *ProductRepo) GetProductsForBranch(branch *models.Branch) error {
 	}
 	return nil
 }
+func (r *ProductRepo) ConnectBranchWithProducts(branch models.Branch, tx *sql.Tx, ctx context.Context) error {
+	var (
+		queryCount = len(branch.Products)
+		args       = make([]interface{}, 0)
+	)
+	for id, product := range branch.Products {
+		args = append(args, branch.ID, id, product.Exist)
+	}
+	_, err := Saver{
+		Query: "INSERT INTO products_branch(branch_id, product_id, exist) VALUES " + strings.Repeat(",(?, ?, ?)", queryCount)[1:],
+		Args:  args,
+	}.Save(tx, ctx)
+	return err
+}
 
 // Basket methods
 func (r *ProductRepo) loadBasket(id int64) (models.Basket, error) {
@@ -340,4 +351,21 @@ func (r *ProductRepo) SaveBasket(basket *models.Basket, tx *sql.Tx, ctx context.
 		}
 	}
 	return saver.Save(tx, ctx)
+}
+func (r *ProductRepo) ConnectBasketWithProducts(basket *models.Basket, tx *sql.Tx, ctx context.Context) error {
+	if len(basket.Products) == 0 {
+		return errors.New("len prod == 0")
+	}
+	var (
+		queryCount = len(basket.Products)
+		args       = make([]interface{}, 0)
+	)
+	for _, product := range basket.Products {
+		args = append(args, product.ID, basket.ID)
+	}
+	_, err := Saver{
+		Query: "INSERT INTO products_basket(product_id, basket_id) VALUES " + strings.Repeat(",(?, ?)", queryCount)[1:],
+		Args:  args,
+	}.Save(tx, ctx)
+	return err
 }
