@@ -35,18 +35,25 @@ func TestInit(t *testing.T) {
 	branch.WorkingHour.Close = "21:10"
 	branch.Coordinate = models.NewCoordinate(faker.Name(), rand.Float64(), rand.Float64())
 
-	assert.NoError(t, db.GetHelperRepo().SaveCoordinate(&branch.Coordinate, tx, ctx))
+	branch.Coordinate.ID, err = db.GetHelperRepo().SaveCoordinate(branch.Coordinate, tx, ctx)
+	assert.NoError(t, err)
 	assert.NoError(t, db.GetUserRepo().SaveBranch(branch, tx, ctx))
 
 	prodTypes := *models.GetProductTypes()
 	p, err := models.NewProduct(faker.Name(), rand.Float32(), prodTypes[1])
 	assert.NoError(t, err)
 
-	product, err := suppl.AddProduct(p)
 	assert.NoError(t, err)
+	assert.NoError(t, err)
+	product, err := suppl.AddProduct(p)
+	log.Println(product.ID)
 
-	product.ID, err = db.GetProductRepo().SaveProduct(product, tx, ctx)
-	log.Println(product.ID, product.Name)
+	newProductId, err := db.GetProductRepo().SaveProduct(product, tx, ctx)
+	assert.NoError(t, err)
+	delete(suppl.Products, product.ID)
+	product.ID = newProductId
+	suppl.Products[product.ID] = product
+	_, err = branch.AddProductFromSupplier(product.ID, false)
 	assert.NoError(t, err)
 
 	for i := 0; i < 3; i++ {
@@ -58,17 +65,36 @@ func TestInit(t *testing.T) {
 	}
 
 	assert.NoError(t, db.GetProductRepo().SaveIngredients(product.Ingredients, tx, ctx))
-	//for _, i := range product.Ingredients {
-	//	log.Print(*i)
-	//}
-	//ings := *models.GetIngredients()
-	//for k, v := range ings {
-	//	log.Println(k, *v)
-	//}
-
 	assert.NoError(t, db.GetProductRepo().ConnectProductWithIngredient(*product, tx, ctx))
 
+	log.Println(branch.Products)
+	assert.NoError(t, db.GetProductRepo().ConnectBranchWithProducts(*branch, tx, ctx))
+
+	client := models.NewClient(getFullUser())
+	client.ID, err = db.GetUserRepo().SaveClient(&client, tx, ctx)
+	assert.NoError(t, err)
+
+	clientHome := models.NewCoordinate("home", rand.Float64(), rand.Float64())
+	client.AddCoordinate(&clientHome)
+
+	clientHome.ID, err = db.GetHelperRepo().SaveCoordinate(clientHome, tx, ctx)
+	assert.NoError(t, err)
+	assert.NoError(t, db.GetHelperRepo().ConnectCoordinateWithClient(&client, tx, ctx))
+
+	clientBasket, err := client.MakeBasket(&clientHome)
+	clientBasket.ID, err = db.GetProductRepo().SaveBasket(&clientBasket, tx, ctx)
+	assert.NoError(t, err)
+
+	assert.NoError(t, clientBasket.AddProduct(product))
+	assert.NoError(t, db.GetProductRepo().ConnectBasketWithProducts(&clientBasket, tx, ctx))
+
+	device, err := client.MakeDevice("Mozilla")
+	assert.NoError(t, err)
+	device.ID, err = db.GetHelperRepo().SaveDevice(device, tx, ctx)
+	assert.NoError(t, err)
+
 	assert.NoError(t, tx.Commit())
+
 }
 
 func getFullUser() models.User {
