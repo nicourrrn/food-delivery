@@ -28,9 +28,12 @@ func NewDB(login, password, dbName string) (DB, error) {
 }
 
 func InitDB(db *DB) error {
-	InitUserRepo(db)
+	_, err := InitUserRepo(db)
+	if err != nil {
+		return err
+	}
 	InitHelperRepo(db)
-	_, err := InitProductRepo(db)
+	_, err = InitProductRepo(db)
 	if err != nil {
 		return err
 	}

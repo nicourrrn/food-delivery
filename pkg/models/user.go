@@ -29,3 +29,7 @@ func (u *User) MakeDevice(userAgent string) (*Device, error) {
 	return &u.Devices[len(u.Devices)-1], nil
 
 }
+
+func (u *User) ComparePassword(pass string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(u.PassHash), []byte(pass)) == nil
+}
