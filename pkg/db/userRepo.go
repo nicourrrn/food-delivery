@@ -316,3 +316,21 @@ func (r *UserRepo) AddSupplier(supplier models.Supplier) {
 		DeadTime time.Time
 	}{Supplier: &supplier, DeadTime: time.Now().Add(time.Hour)}
 }
+
+func (r *UserRepo) GetSuppliersList() ([]models.Supplier, error) {
+	query := "SELECT supplier_info.user_id, supplier_info.description, supplier_info.image, u.name, st.name FROM supplier_info\nJOIN users u on supplier_info.user_id = u.id\nJOIN supplier_types st on supplier_info.supplier_type_id = st.id;"
+	rows, err := r.Conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	suppliers := make([]models.Supplier, 0)
+	for rows.Next() {
+		var s models.Supplier
+		err = rows.Scan(&s.ID, &s.Description, &s.Image, &s.Name, &s.Type)
+		if err != nil {
+			return nil, err
+		}
+		suppliers = append(suppliers, s)
+	}
+	return suppliers, nil
+}

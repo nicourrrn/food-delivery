@@ -31,6 +31,7 @@ func main() {
 	server.HandleFunc("/sign_up", SignUp)
 	server.HandleFunc("/sign_in", SignIn)
 	server.HandleFunc("/get_me", GetMe)
+	server.HandleFunc("/get_suppliers", GetSupplierList)
 
 	log.Println(http.ListenAndServe(":8080", server))
 }

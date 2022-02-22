@@ -8,18 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"math/rand"
+	"os"
 	"testing"
 )
 
 func TestInit(t *testing.T) {
-	newDB, err := db.NewDB("student", "Stud_21g", "test_delivery")
+	models.InitModels()
+	newDB, err := db.NewDB(os.Getenv("DB_LOGIN"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 	assert.NoError(t, err)
 
 	models.InitModels()
 	assert.NoError(t, db.InitDB(&newDB))
 
 	suppTypes := *models.GetSupplierTypes()
-	suppl, err := models.NewSupplier(getFullUser(), suppTypes[1])
+	suppl, err := models.NewSupplier(getFullUser(), suppTypes[3])
 	assert.NoError(t, err)
 
 	ctx := context.Background()
@@ -40,7 +42,7 @@ func TestInit(t *testing.T) {
 	assert.NoError(t, db.GetUserRepo().SaveBranch(branch, tx, ctx))
 
 	prodTypes := *models.GetProductTypes()
-	p, err := models.NewProduct(faker.Name(), rand.Float32(), prodTypes[1])
+	p, err := models.NewProduct(faker.Name(), rand.Float32(), prodTypes[3])
 	assert.NoError(t, err)
 
 	assert.NoError(t, err)
