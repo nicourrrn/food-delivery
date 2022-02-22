@@ -1,6 +1,8 @@
 package token
 
-import "time"
+import (
+	"time"
+)
 
 type TokenPair struct {
 	RefreshToken, AccessToken *UserClaim

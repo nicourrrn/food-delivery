@@ -28,5 +28,6 @@ func main() {
 
 	server := http.NewServeMux()
 	server.HandleFunc("/sing_up", SingUp)
+	server.HandleFunc("/get_me", GetMe)
 	log.Println(http.ListenAndServe(":8080", server))
 }

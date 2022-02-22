@@ -67,6 +67,12 @@ func GetUserRepo() *UserRepo {
 	return globalUserRepo
 }
 
+func (r *UserRepo) GetUserType(id int64) (userType string, err error) {
+	query := "SELECT user_type_id FROM users JOIN users_types on users.user_type_id = users_types.id WHERE users.id = ?;"
+	err = r.Conn.QueryRow(query, id).Scan(&userType)
+	return
+}
+
 // TODO return type
 func (r *UserRepo) LoadUser(key, value string) (int64, string, error) {
 	if !slice.Contains(keys, key) {
@@ -76,10 +82,12 @@ func (r *UserRepo) LoadUser(key, value string) (int64, string, error) {
 		"SELECT users.id, users.name, users.login, users.email, ut.name FROM" +
 			" users JOIN users_types ut on users.user_type_id = ut.id WHERE users." +
 			key + " = ?"
+	log.Println(value)
 	row := r.Conn.QueryRow(query, value)
 	user := models.User{}
 	var userType string
 	err := row.Scan(user.ID, user.Name, user.Login, user.Email, userType)
+	log.Println(user.Name)
 	if err != nil {
 		return 0, "", err
 	}

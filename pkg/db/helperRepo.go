@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"food-delivery/pkg/models"
+	"log"
 	"strings"
 	"time"
 )
@@ -53,6 +54,24 @@ func (r *HelperRepo) GetDevice(id int64) (*models.Device, error) {
 		data.DeadTime = time.Now().Add(time.Hour)
 		return data.Device, nil
 	}
+}
+func (r *HelperRepo) GetDeviceByUser(user *models.User) ([]models.Device, error) {
+	log.Println(user.ID)
+	rows, err := r.Conn.Query("SELECT id, last_visit, user_agent, refresh_key FROM devices WHERE user_id = ?", user.ID)
+	if err != nil {
+		return nil, err
+	}
+	devices := make([]models.Device, 0)
+	for rows.Next() {
+		var device models.Device
+		err = rows.Scan(&device.ID, &device.LastVisit, &device.UserAgent, &device.RefreshKeyHash)
+		if err != nil {
+			return nil, err
+		}
+		devices = append(devices, device)
+	}
+	user.Devices = devices
+	return devices, nil
 }
 func (r *HelperRepo) LoadDevice(id int64) (models.Device, error) {
 	row := r.Conn.QueryRow("SELECT user_id, last_visit, user_agent, refresh_key FROM devices WHERE id = ?;", id)

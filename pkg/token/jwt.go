@@ -13,6 +13,14 @@ var (
 	accessLifeTime, refreshLifeTime time.Duration
 )
 
+func GetAccess() string {
+	return accessKey
+}
+
+func GetRefresh() string {
+	return refreshKey
+}
+
 func InitJwt() error {
 	refreshKey = os.Getenv("REFRESH_KEY")
 	accessKey = os.Getenv("ACCESS_KEY")
@@ -20,7 +28,7 @@ func InitJwt() error {
 	if err != nil {
 		return err
 	}
-	refreshLifeTime = time.Second * time.Duration(tempInt)
+	accessLifeTime = time.Second * time.Duration(tempInt)
 	tempInt, err = strconv.Atoi(os.Getenv("REFRESH_LIFETIME_SECOND"))
 	if err != nil {
 		return err
@@ -44,7 +52,7 @@ func NewUserClaim(userId int64, lifeTime time.Time) *UserClaim {
 }
 
 func (c *UserClaim) SetKey(key string) (string, error) {
-	return jwt.NewWithClaims(jwt.SigningMethodHS256, c).SignedString(key)
+	return jwt.NewWithClaims(jwt.SigningMethodHS256, c).SignedString([]byte(key))
 }
 
 func GetClaim(token, key string) (*UserClaim, error) {

@@ -8,6 +8,7 @@ import (
 	"food-delivery/pkg/token"
 	"log"
 	"net/http"
+	"time"
 )
 
 type SingUpRequest struct {
@@ -34,24 +35,8 @@ func SingUp(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotAcceptable)
 	}
-	// Проверка на занятость
-	id, _, err := userRepo.LoadUser("email", body.Email)
-	if err != nil {
-		log.Println(err)
-	}
-	if id != 0 {
-		http.Error(writer, "email занят", http.StatusNotAcceptable)
-	}
-	id, _, err = userRepo.LoadUser("login", body.Login)
-	if err != nil {
-		log.Println(err)
-	}
-	if id != 0 {
-		http.Error(writer, "email занят", http.StatusNotAcceptable)
-	}
 
 	// регистрация
-
 	user, err := models.NewUser(body.Login, body.Password)
 	if err != nil {
 		log.Println(err)
@@ -67,22 +52,101 @@ func SingUp(writer http.ResponseWriter, request *http.Request) {
 	switch body.Type {
 	case "Client":
 		client := models.NewClient(user)
-		client.ID, err = userRepo.SaveClient(&client, tx, ctx)
-		keys = token.NewTokenPair(client.ID)
+		user.ID, err = userRepo.SaveClient(&client, tx, ctx)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusConflict)
+			return
+		}
+		keys = token.NewTokenPair(user.ID)
 		//case "Supplier:":
 	}
 
 	// Return keys
-	refresh, access, err := keys.GetStrings()
+	response := SingUpResponse{}
+	response.RefreshToken, response.AccessToken, err = keys.GetStrings()
 	if err != nil {
 		log.Println(err)
 	}
-	response := SingUpResponse{
-		RefreshToken: refresh,
-		AccessToken:  access,
+
+	device, err := user.MakeDevice(request.UserAgent())
+	if err != nil {
+		log.Println(err)
 	}
+	device.RefreshKeyHash = response.RefreshToken
+	device.LastVisit = time.Now()
+	log.Println(device.User.ID, user.ID)
+	device.ID, err = db.GetHelperRepo().SaveDevice(device, tx, ctx)
+
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusConflict)
+		return
+	}
+
+	if err = tx.Commit(); err != nil {
+		http.Error(writer, err.Error(), http.StatusConflict)
+		return
+	}
+
 	err = json.NewEncoder(writer).Encode(response)
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+type GetMeResponse struct {
+	Name, Email, Login, Type string
+}
+
+func GetMe(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodGet {
+		http.Error(writer, "Method not alowed", http.StatusMethodNotAllowed)
+	}
+
+	accessToken := request.Header.Get("AccessToken")
+	if accessToken == "" {
+		http.Error(writer, "Sing up or sing in please", http.StatusLocked)
+	}
+
+	claim, err := token.GetClaim(accessToken, token.GetAccess())
+	if err != nil {
+		http.Error(writer, "Token has expired", http.StatusLocked)
+		log.Println(err)
+	}
+	userType, err := db.GetUserRepo().GetUserType(claim.UserId)
+	if err != nil {
+		log.Println(err)
+	}
+	var response GetMeResponse
+	switch userType {
+	case "Client":
+		client, err := db.GetUserRepo().GetClient(claim.UserId)
+		if err != nil {
+			log.Println(err)
+		}
+
+		//TODO вынести в middleware
+		devices, err := db.GetHelperRepo().GetDeviceByUser(&client.User)
+		if err != nil {
+			log.Println(err)
+		}
+		for i, d := range devices {
+			if d.UserAgent == request.UserAgent() {
+				devices[i].LastVisit = time.Now()
+				break
+			}
+		}
+		client.Devices = devices
+
+		response.Name = client.Name
+		response.Email = client.Email
+		response.Type = "Client"
+		response.Login = client.Login
+	}
+
+	err = json.NewEncoder(writer).Encode(response)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusNotAcceptable)
+		log.Println(err)
+	}
+
 }
