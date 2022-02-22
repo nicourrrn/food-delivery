@@ -68,7 +68,7 @@ func GetUserRepo() *UserRepo {
 }
 
 func (r *UserRepo) GetUserType(id int64) (userType string, err error) {
-	query := "SELECT user_type_id FROM users JOIN users_types on users.user_type_id = users_types.id WHERE users.id = ?;"
+	query := "SELECT users_types.name FROM users JOIN users_types on users.user_type_id = users_types.id WHERE users.id = ?;"
 	err = r.Conn.QueryRow(query, id).Scan(&userType)
 	return
 }
@@ -82,12 +82,11 @@ func (r *UserRepo) LoadUser(key, value string) (int64, string, error) {
 		"SELECT users.id, users.name, users.login, users.email, ut.name FROM" +
 			" users JOIN users_types ut on users.user_type_id = ut.id WHERE users." +
 			key + " = ?"
-	log.Println(value)
+	log.Println(query)
 	row := r.Conn.QueryRow(query, value)
-	user := models.User{}
+	var user models.User
 	var userType string
-	err := row.Scan(user.ID, user.Name, user.Login, user.Email, userType)
-	log.Println(user.Name)
+	err := row.Scan(&user.ID, &user.Name, &user.Login, &user.Email, &userType)
 	if err != nil {
 		return 0, "", err
 	}
@@ -120,6 +119,10 @@ func (r *UserRepo) SaveUser(user models.User, userType string, tx *sql.Tx, ctx c
 		}
 	}
 	return saver.Save(tx, ctx)
+}
+func (r *UserRepo) LoadPassHash(userId int64) (passHash string, err error) {
+	err = r.Conn.QueryRow("SELECT pass_hash FROM users WHERE id = ?;", userId).Scan(&passHash)
+	return
 }
 
 // Client methods

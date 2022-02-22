@@ -6,11 +6,12 @@ import (
 	"food-delivery/pkg/token"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	models.InitModels()
-	database, err := db.NewDB("student", "Stud_21g", "test_delivery")
+	database, err := db.NewDB(os.Getenv("DB_LOGIN"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 	if err != nil {
 		log.Println(err)
 		return
@@ -27,7 +28,9 @@ func main() {
 	}
 
 	server := http.NewServeMux()
-	server.HandleFunc("/sing_up", SingUp)
+	server.HandleFunc("/sign_up", SignUp)
+	server.HandleFunc("/sign_in", SignIn)
 	server.HandleFunc("/get_me", GetMe)
+
 	log.Println(http.ListenAndServe(":8080", server))
 }

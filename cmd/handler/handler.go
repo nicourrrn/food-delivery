@@ -6,12 +6,13 @@ import (
 	"food-delivery/pkg/db"
 	"food-delivery/pkg/models"
 	"food-delivery/pkg/token"
+	"golang.org/x/crypto/bcrypt"
 	"log"
 	"net/http"
 	"time"
 )
 
-type SingUpRequest struct {
+type SignUpRequest struct {
 	Email        string `json:"email"`
 	Login        string `json:"login"`
 	Password     string `json:"password"`
@@ -19,18 +20,18 @@ type SingUpRequest struct {
 	SupplierType string `json:"supplier_type"`
 }
 
-type SingUpResponse struct {
+type SignResponse struct {
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token"`
 	Error        string `json:"error"`
 }
 
-func SingUp(writer http.ResponseWriter, request *http.Request) {
+func SignUp(writer http.ResponseWriter, request *http.Request) {
 	if request.Method != http.MethodPost {
 		http.Error(writer, "Method not alowed", http.StatusMethodNotAllowed)
 	}
 	userRepo := db.GetUserRepo()
-	var body SingUpRequest
+	var body SignUpRequest
 	err := json.NewDecoder(request.Body).Decode(&body)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotAcceptable)
@@ -62,7 +63,7 @@ func SingUp(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	// Return keys
-	response := SingUpResponse{}
+	response := SignResponse{}
 	response.RefreshToken, response.AccessToken, err = keys.GetStrings()
 	if err != nil {
 		log.Println(err)
@@ -95,6 +96,10 @@ func SingUp(writer http.ResponseWriter, request *http.Request) {
 
 type GetMeResponse struct {
 	Name, Email, Login, Type string
+	Devices                  []struct {
+		UserAgent string
+		LastVisit int64
+	}
 }
 
 func GetMe(writer http.ResponseWriter, request *http.Request) {
@@ -105,12 +110,13 @@ func GetMe(writer http.ResponseWriter, request *http.Request) {
 	accessToken := request.Header.Get("AccessToken")
 	if accessToken == "" {
 		http.Error(writer, "Sing up or sing in please", http.StatusLocked)
+		return
 	}
 
 	claim, err := token.GetClaim(accessToken, token.GetAccess())
 	if err != nil {
-		http.Error(writer, "Token has expired", http.StatusLocked)
-		log.Println(err)
+		http.Error(writer, err.Error(), http.StatusLocked)
+		return
 	}
 	userType, err := db.GetUserRepo().GetUserType(claim.UserId)
 	if err != nil {
@@ -121,19 +127,22 @@ func GetMe(writer http.ResponseWriter, request *http.Request) {
 	case "Client":
 		client, err := db.GetUserRepo().GetClient(claim.UserId)
 		if err != nil {
-			log.Println(err)
+			log.Println("Client error", err)
 		}
 
 		//TODO вынести в middleware
 		devices, err := db.GetHelperRepo().GetDeviceByUser(&client.User)
 		if err != nil {
-			log.Println(err)
+			log.Println("Device error", err)
 		}
 		for i, d := range devices {
 			if d.UserAgent == request.UserAgent() {
 				devices[i].LastVisit = time.Now()
-				break
 			}
+			response.Devices = append(response.Devices, struct {
+				UserAgent string
+				LastVisit int64
+			}{UserAgent: d.UserAgent, LastVisit: d.LastVisit.Unix()})
 		}
 		client.Devices = devices
 
@@ -147,6 +156,65 @@ func GetMe(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusNotAcceptable)
 		log.Println(err)
+	}
+
+}
+
+type SignInRequest struct {
+	Login    string `json:"login"`
+	Password string `json:"password"`
+}
+
+func SignIn(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "Method not alowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var body SignInRequest
+	if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	userRepo := db.GetUserRepo()
+	key := "login"
+	for _, char := range body.Login {
+		if char == '@' {
+			key = "email"
+		}
+	}
+	id, userType, err := userRepo.LoadUser(key, body.Login)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	switch userType {
+	case "Client":
+		client, err := userRepo.GetClient(id)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusNotFound)
+			return
+		}
+		userPassHash, err := userRepo.LoadPassHash(client.ID)
+		if err != nil {
+			http.Error(writer, err.Error(), http.StatusNotFound)
+			return
+		}
+		err = bcrypt.CompareHashAndPassword([]byte(userPassHash), []byte(body.Password))
+		if err != nil {
+			http.Error(writer, "Неверный пароль!", http.StatusUnauthorized)
+			return
+		}
+		log.Println("Client id", client.ID)
+
+		var response SignResponse
+		response.RefreshToken, response.AccessToken, err = token.NewTokenPair(client.ID).GetStrings()
+
+		err = json.NewEncoder(writer).Encode(response)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 }
