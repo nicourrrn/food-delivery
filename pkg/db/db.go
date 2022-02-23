@@ -69,9 +69,6 @@ type Saver struct {
 func (s Saver) Save(tx *sql.Tx, ctx context.Context) (int64, error) {
 	result, err := tx.ExecContext(ctx, s.Query, s.Args...)
 	if err != nil {
-		//if strings.HasPrefix(err.Error(), "Error 1062") {
-		//	return 0, err
-		//}
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			return 0, err

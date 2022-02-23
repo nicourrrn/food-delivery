@@ -65,7 +65,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_baskets
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_baskets
     BEFORE UPDATE ON baskets
     FOR EACH ROW
 BEGIN
@@ -126,7 +126,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_branches
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_branches
     BEFORE UPDATE ON branches
     FOR EACH ROW
 BEGIN
@@ -182,7 +182,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_client_coordinates
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_client_coordinates
     BEFORE UPDATE ON client_coordinates
     FOR EACH ROW
 BEGIN
@@ -236,7 +236,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_client_info
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_client_info
     BEFORE UPDATE ON client_info
     FOR EACH ROW
 BEGIN
@@ -292,7 +292,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_coordinates
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_coordinates
     BEFORE UPDATE ON coordinates
     FOR EACH ROW
 BEGIN
@@ -350,7 +350,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_devices
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_devices
     BEFORE UPDATE ON devices
     FOR EACH ROW
 BEGIN
@@ -404,7 +404,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_ingredients
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_ingredients
     BEFORE UPDATE ON ingredients
     FOR EACH ROW
 BEGIN
@@ -460,7 +460,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_product_ingredients
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_product_ingredients
     BEFORE UPDATE ON product_ingredients
     FOR EACH ROW
 BEGIN
@@ -514,7 +514,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_product_types
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_product_types
     BEFORE UPDATE ON product_types
     FOR EACH ROW
 BEGIN
@@ -576,7 +576,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_products
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_products
     BEFORE UPDATE ON products
     FOR EACH ROW
 BEGIN
@@ -615,7 +615,7 @@ CREATE TABLE `products_basket` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_products_basket
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_products_basket
     BEFORE UPDATE ON products_basket
     FOR EACH ROW
 BEGIN
@@ -655,7 +655,7 @@ CREATE TABLE `products_branch` (
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_products_branch
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_products_branch
     BEFORE UPDATE ON products_branch
     FOR EACH ROW
 BEGIN
@@ -713,7 +713,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_supplier_info
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_supplier_info
     BEFORE UPDATE ON supplier_info
     FOR EACH ROW
 BEGIN
@@ -767,7 +767,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_supplier_types
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_supplier_types
     BEFORE UPDATE ON supplier_types
     FOR EACH ROW
 BEGIN
@@ -828,7 +828,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_users
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_users
     BEFORE UPDATE ON users
     FOR EACH ROW
 BEGIN
@@ -882,7 +882,7 @@ DELIMITER ;
 /*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
 /*!50003 SET sql_mode              = 'IGNORE_SPACE,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION' */ ;
 DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`student`@`localhost`*/ /*!50003 TRIGGER update_time_users_types
+/*!50003 CREATE*/ /*!50017 DEFINER=`sorokin`@`localhost`*/ /*!50003 TRIGGER update_time_users_types
     BEFORE UPDATE ON users_types
     FOR EACH ROW
 BEGIN

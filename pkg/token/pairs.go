@@ -1,6 +1,7 @@
 package token
 
 import (
+	"strings"
 	"time"
 )
 
@@ -13,6 +14,18 @@ func NewTokenPair(userId int64) TokenPair {
 		RefreshToken: NewUserClaim(userId, time.Now().Add(refreshLifeTime)),
 		AccessToken:  NewUserClaim(userId, time.Now().Add(accessLifeTime)),
 	}
+}
+func NewTokenPairFromStrings(refresh, access string) (pair TokenPair, err error) {
+	pair.RefreshToken, err = GetClaim(refresh, refreshKey)
+	if err != nil && !strings.HasPrefix(err.Error(), "token is expired ") {
+		return
+	}
+	pair.AccessToken, err = GetClaim(access, accessKey)
+	if err != nil && !strings.HasPrefix(err.Error(), "token is expired ") {
+		return
+	}
+	err = nil
+	return
 }
 
 func (p TokenPair) GetStrings() (refresh, access string, err error) {

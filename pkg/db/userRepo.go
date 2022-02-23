@@ -82,7 +82,6 @@ func (r *UserRepo) LoadUser(key, value string) (int64, string, error) {
 		"SELECT users.id, users.name, users.login, users.email, ut.name FROM" +
 			" users JOIN users_types ut on users.user_type_id = ut.id WHERE users." +
 			key + " = ?"
-	log.Println(query)
 	row := r.Conn.QueryRow(query, value)
 	var user models.User
 	var userType string

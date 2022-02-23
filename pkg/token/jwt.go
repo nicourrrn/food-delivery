@@ -59,12 +59,12 @@ func GetClaim(token, key string) (*UserClaim, error) {
 	jwtToken, err := jwt.ParseWithClaims(token, &UserClaim{}, func(t *jwt.Token) (interface{}, error) {
 		return []byte(key), nil
 	})
-	if err != nil {
+	if jwtToken == nil {
 		return nil, err
 	}
 	claims, ok := jwtToken.Claims.(*UserClaim)
-	if !ok || !jwtToken.Valid {
+	if !ok {
 		return nil, errors.New("failed to parse")
 	}
-	return claims, nil
+	return claims, err
 }

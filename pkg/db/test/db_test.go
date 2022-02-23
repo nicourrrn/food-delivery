@@ -21,7 +21,7 @@ func TestInit(t *testing.T) {
 	assert.NoError(t, db.InitDB(&newDB))
 
 	suppTypes := *models.GetSupplierTypes()
-	suppl, err := models.NewSupplier(getFullUser(), suppTypes[3])
+	suppl, err := models.NewSupplier(getFullUser(), suppTypes[4])
 	assert.NoError(t, err)
 
 	ctx := context.Background()

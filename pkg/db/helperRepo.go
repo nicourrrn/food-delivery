@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"food-delivery/pkg/models"
-	"log"
 	"strings"
 	"time"
 )
@@ -56,7 +55,6 @@ func (r *HelperRepo) GetDevice(id int64) (*models.Device, error) {
 	}
 }
 func (r *HelperRepo) GetDeviceByUser(user *models.User) ([]models.Device, error) {
-	log.Println(user.ID)
 	rows, err := r.Conn.Query("SELECT id, last_visit, user_agent, refresh_key FROM devices WHERE user_id = ?", user.ID)
 	if err != nil {
 		return nil, err
@@ -97,6 +95,7 @@ func (r *HelperRepo) SaveDevice(device *models.Device, tx *sql.Tx, ctx context.C
 		args  = []interface{}{device.LastVisit, device.RefreshKeyHash}
 		saver Saver
 	)
+
 	if device.ID == 0 {
 		saver = Saver{
 			Query: "INSERT INTO devices(last_visit, refresh_key, user_id, user_agent) VALUE (?, ?, ?, ?);",
@@ -105,7 +104,7 @@ func (r *HelperRepo) SaveDevice(device *models.Device, tx *sql.Tx, ctx context.C
 	} else {
 		saver = Saver{
 			Query: "UPDATE devices SET last_visit = ?, refresh_key = ? WHERE id = ?;",
-			Args:  args,
+			Args:  append(args, device.ID),
 		}
 	}
 	return saver.Save(tx, ctx)
