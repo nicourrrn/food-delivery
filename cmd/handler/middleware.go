@@ -28,3 +28,9 @@ func AuthorizedUser(next http.Handler) http.Handler {
 			next.ServeHTTP(writer, request)
 		})
 }
+func Base(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Add("Access-Control-Allow-Origin", "*")
+		next.ServeHTTP(writer, request)
+	})
+}

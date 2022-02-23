@@ -38,15 +38,18 @@ func Init() (err error) {
 
 func ServerSetup() *http.ServeMux {
 	server := http.NewServeMux()
-	authorizedMiddleware := alice.New(AuthorizedUser)
+	authorizedMiddleware := alice.New(Base, AuthorizedUser)
+	baseMiddleware := alice.New(Base)
 
-	server.HandleFunc("/sign_up", SignUp)
-	server.HandleFunc("/sign_in", SignIn)
-	server.HandleFunc("/refresh", Refresh)
+	server.Handle("/sign_up", baseMiddleware.ThenFunc(SignUp))
+	server.Handle("/sign_in", baseMiddleware.ThenFunc(SignIn))
+	server.Handle("/refresh", baseMiddleware.ThenFunc(Refresh))
 
 	server.Handle("/get_me", authorizedMiddleware.ThenFunc(GetMe))
 	server.Handle("/get_suppliers", authorizedMiddleware.ThenFunc(GetSupplierList))
 	server.Handle("/get_products", authorizedMiddleware.ThenFunc(GetProductList))
+	server.Handle("/baskets/add", authorizedMiddleware.ThenFunc(PostBasket))
+	server.Handle("/baskets/edit", authorizedMiddleware.ThenFunc(UpdateBasket))
 
 	return server
 }

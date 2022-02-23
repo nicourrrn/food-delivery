@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"food-delivery/pkg/db"
@@ -9,6 +10,7 @@ import (
 	"github.com/bxcodec/faker/v3/support/slice"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -178,5 +180,172 @@ func GetProductList(writer http.ResponseWriter, request *http.Request) {
 	}
 
 	log.Println(json.NewEncoder(writer).Encode(GetProductsListResponse{Products: products}))
+
+}
+
+type PostBasketRequest struct {
+	CoordinateTo int64   `json:"coordinate_to"`
+	Products     []int64 `json:"products"`
+}
+type PostBasketResponse struct {
+	BasketId int64 `json:"basket_id"`
+}
+
+func PostBasket(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var body PostBasketRequest
+	err := json.NewDecoder(request.Body).Decode(&body)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if len(body.Products) == 0 {
+		http.Error(writer, "no products", http.StatusBadRequest)
+		return
+	}
+
+	userToken, err := token.GetClaim(request.Header.Get("Access-Token"), token.GetAccess())
+	if err != nil {
+		log.Println(err)
+	}
+	client, err := db.GetUserRepo().GetClient(userToken.UserId)
+	if err != nil {
+		log.Println(err)
+	}
+
+	coordinate, err := db.GetHelperRepo().LoadCoordinate(body.CoordinateTo)
+	if err != nil {
+		log.Println(err)
+	}
+	basket, err := client.MakeBasket(&coordinate)
+	if err != nil {
+		log.Println(err)
+	}
+
+	ctx := context.Background()
+	tx, err := db.GetProductRepo().Conn.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	basket.ID, err = db.GetProductRepo().SaveBasket(&basket, tx, ctx)
+	if err != nil {
+		log.Println(err)
+	}
+
+	args := make([]interface{}, 0)
+
+	for _, prodId := range body.Products {
+		args = append(args, prodId, basket.ID)
+	}
+
+	_, err = tx.ExecContext(ctx,
+		"INSERT INTO products_basket(product_id, basket_id) VALUES "+
+			strings.Repeat(",(?, ?)", len(body.Products))[1:],
+		args...)
+
+	if err != nil {
+		log.Println(err)
+		log.Println(tx.Rollback())
+	}
+
+	response := PostBasketResponse{
+		BasketId: basket.ID,
+	}
+
+	log.Println(tx.Commit())
+	log.Println(json.NewEncoder(writer).Encode(response))
+}
+
+type UpdateBasketRequest struct {
+	BasketId       int64   `json:"basket_id"`
+	Paid           bool    `json:"paid"`
+	Closed         bool    `json:"closed"`
+	Editable       bool    `json:"editable"`
+	CoordinateTo   int64   `json:"coordinate_to"`
+	NewProductList []int64 `json:"new_product_list"`
+}
+
+func UpdateBasket(writer http.ResponseWriter, request *http.Request) {
+	if request.Method != http.MethodPost {
+		http.Error(writer, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var body UpdateBasketRequest
+	err := json.NewDecoder(request.Body).Decode(&body)
+	if err != nil {
+		log.Println(err)
+	}
+	userToken, err := token.GetClaim(request.Header.Get("Access-Token"), token.GetAccess())
+	if err != nil {
+		log.Println(err)
+	}
+	client, err := db.GetUserRepo().GetClient(userToken.UserId)
+	if err != nil {
+		log.Println(err)
+	}
+
+	var basket models.Basket
+	var clientId int64
+	err = db.GetProductRepo().Conn.QueryRow(
+		"SELECT id, client_id, paid, closed, editable FROM baskets WHERE id = ?",
+		body.BasketId).Scan(
+		&basket.ID, &clientId,
+		&basket.Paid, &basket.Closed, &basket.Editable)
+	if err != nil {
+		log.Println(err)
+	}
+
+	if clientId != client.ID {
+		http.Error(writer, "", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := context.Background()
+	tx, err := db.GetProductRepo().Conn.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	if basket.Editable && len(body.NewProductList) != 0 {
+		_, err = tx.ExecContext(ctx,
+			"DELETE FROM products_basket WHERE basket_id = ?;",
+			basket.ID)
+		args := make([]interface{}, 0)
+		for _, prodId := range body.NewProductList {
+			args = append(args, prodId)
+		}
+		_, err := tx.ExecContext(ctx,
+			"INSERT INTO products_basket VALUES "+
+				strings.Repeat(",(?,?)", len(body.NewProductList))[1:], args...)
+		if err != nil {
+			log.Println(err)
+			log.Println(tx.Rollback())
+		}
+	}
+
+	if !basket.Closed && !basket.Paid {
+		basket.Paid = body.Paid
+	}
+	if !basket.Closed && !basket.Editable {
+		basket.Editable = body.Editable
+	}
+	if !basket.Closed {
+		basket.Closed = body.Closed
+	}
+
+	ctx = context.Background()
+	tx, err = db.GetProductRepo().Conn.BeginTx(ctx, nil)
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = db.GetProductRepo().SaveBasket(&basket, tx, ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(tx.Commit())
 
 }

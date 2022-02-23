@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"food-delivery/pkg/models"
 	"github.com/bxcodec/faker/v3/support/slice"
 	"log"
@@ -78,10 +79,8 @@ func (r *UserRepo) LoadUser(key, value string) (int64, string, error) {
 	if !slice.Contains(keys, key) {
 		return 0, "", errors.New("key unknown")
 	}
-	query :=
-		"SELECT users.id, users.name, users.login, users.email, ut.name FROM" +
-			" users JOIN users_types ut on users.user_type_id = ut.id WHERE users." +
-			key + " = ?"
+	query := fmt.Sprintf("SELECT users.id, users.name, users.login, users.email, ut.name FROM"+
+		" users JOIN users_types ut on users.user_type_id = ut.id WHERE users.%s = ?", key)
 	row := r.Conn.QueryRow(query, value)
 	var user models.User
 	var userType string

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"food-delivery/pkg/models"
+	"log"
 	"strings"
 	"time"
 )
@@ -75,8 +76,7 @@ func (r *ProductRepo) GetProduct(id int64) (*models.Product, error) {
 	}
 }
 func (r *ProductRepo) loadProduct(id int64) (models.Product, error) {
-	// Product getting
-	row := r.Conn.QueryRow("SELECT supl_id, name, description, image, price, type_id FROM products WHERE id = ?", id)
+	row := r.Conn.QueryRow("SELECT supplier_id, name, description, image, price, type_id FROM products WHERE id = ?", id)
 	product := models.Product{ID: id}
 	var (
 		supplierId, typeId int64
@@ -85,7 +85,6 @@ func (r *ProductRepo) loadProduct(id int64) (models.Product, error) {
 	if err != nil {
 		return models.Product{}, err
 	}
-
 	// Product setup
 	var ok bool
 	product.Type, ok = (*models.GetProductTypes())[typeId]
@@ -304,15 +303,18 @@ func (r *ProductRepo) loadBasket(id int64) (models.Basket, error) {
 	if err != nil {
 		return models.Basket{}, err
 	}
+	log.Println("Products repo 306")
 	basket.CoordinateTo, err = globalHelperRepo.GetCoordinate(coordinateToId)
 	if err != nil {
 		return models.Basket{}, err
 	}
 	basket.Client, err = globalUserRepo.GetClient(clientId)
+	log.Println("Get Client 312")
 	if err != nil {
 		return models.Basket{}, err
 	}
 	_, err = globalProductRepo.GetProductsForBasket(&basket)
+	log.Println("Get Prod Bask 317")
 	if err != nil {
 		return models.Basket{}, err
 	}
